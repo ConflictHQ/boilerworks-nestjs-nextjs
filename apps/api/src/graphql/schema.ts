@@ -8,6 +8,7 @@ import "../users/users.resolver";
 import "../permissions/permissions.resolver";
 import "../permissions/permissions.debug";
 import "../forms/forms.resolver";
+import "../forms/forms.analytics";
 import "../workflows/workflows.resolver";
 import "../uploads/uploads.resolver";
 import "../notifications/notifications.resolver";
