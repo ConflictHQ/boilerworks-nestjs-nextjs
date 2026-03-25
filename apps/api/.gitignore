@@ -1,0 +1,11 @@
+dist/
+# Build artifacts (nest build outputs alongside sources)
+src/**/*.js
+src/**/*.d.ts
+src/**/*.js.map
+src/**/*.d.ts.map
+prisma/**/*.js
+prisma/**/*.d.ts
+prisma/**/*.js.map
+prisma/**/*.d.ts.map
+tsconfig.tsbuildinfo
