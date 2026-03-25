@@ -1,5 +1,6 @@
 import { Controller, Get } from "@nestjs/common";
 import { PrismaService } from "./prisma/prisma.service";
+import { features } from "./config/features";
 
 @Controller("health")
 export class HealthController {
@@ -21,6 +22,7 @@ export class HealthController {
     return {
       status: healthy ? "ok" : "degraded",
       checks,
+      features,
       timestamp: new Date().toISOString(),
     };
   }
