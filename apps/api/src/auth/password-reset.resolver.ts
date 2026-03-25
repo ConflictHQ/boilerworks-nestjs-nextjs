@@ -1,6 +1,9 @@
 import { builder } from "../graphql/builder";
 import { MutationResult, mutationOk, mutationError } from "../graphql/types";
 import { randomBytes, createHash, scryptSync } from "crypto";
+import { EmailService } from "../notifications/email.service";
+
+const emailService = new EmailService();
 
 builder.mutationField("requestPasswordReset", (t) =>
   t.field({
@@ -21,7 +24,7 @@ builder.mutationField("requestPasswordReset", (t) =>
       const tokenHash = createHash("sha256").update(rawToken).digest("hex");
       const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
 
-      // Store hashed token in session table (reusing for simplicity)
+      // Store hashed token in session table
       await ctx.prisma.session.create({
         data: {
           userId: user.id,
@@ -30,11 +33,10 @@ builder.mutationField("requestPasswordReset", (t) =>
         },
       });
 
-      // TODO: Send email via EmailService
-      // For now, log the reset URL
       const frontendUrl = process.env.CORS_ORIGINS?.split(",")[0] || "http://localhost:3000";
       const resetUrl = `${frontendUrl}/auth/reset-password?token=${rawToken}`;
-      console.log(`Password reset URL for ${user.email}: ${resetUrl}`);
+
+      await emailService.sendPasswordReset(user.email, resetUrl);
 
       return mutationOk();
     },
@@ -66,12 +68,10 @@ builder.mutationField("resetPassword", (t) =>
         return mutationError("token", "Invalid or expired reset token");
       }
 
-      // Hash new password
       const salt = randomBytes(16).toString("hex");
       const hash = scryptSync(args.newPassword, salt, 64).toString("hex");
       const passwordHash = `${salt}:${hash}`;
 
-      // Update password and delete reset token
       await ctx.prisma.$transaction([
         ctx.prisma.user.update({
           where: { id: session.userId },

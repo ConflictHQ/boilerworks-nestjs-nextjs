@@ -62,6 +62,16 @@ export class AuthController {
       return res.status(400).json({ error: "Missing authorization code" });
     }
 
+    // Validate state to prevent CSRF
+    try {
+      const authState = JSON.parse(req.cookies?.auth_state || "{}");
+      if (!state || !authState.state || state !== authState.state) {
+        return res.status(403).json({ error: "Invalid state parameter — possible CSRF attack" });
+      }
+    } catch {
+      return res.status(403).json({ error: "Invalid auth state" });
+    }
+
     const callbackUrl = `${process.env.CORS_ORIGINS?.split(",")[0] || "http://localhost:3000"}/auth/callback`;
 
     // Exchange code for tokens
