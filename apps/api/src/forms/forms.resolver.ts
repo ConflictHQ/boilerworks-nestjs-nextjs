@@ -224,3 +224,50 @@ builder.mutationField("submitForm", (t) =>
     },
   }),
 );
+
+// --- Public form submission (no auth required) ---
+
+builder.queryField("publicForm", (t) =>
+  t.prismaField({
+    type: "FormDefinition",
+    nullable: true,
+    args: {
+      slug: t.arg.string({ required: true }),
+    },
+    resolve: (query, _root, args, ctx) => {
+      // No auth required — only returns published public forms
+      return ctx.prisma.formDefinition.findFirst({
+        ...query,
+        where: { slug: args.slug, status: "published", isPublic: true },
+        orderBy: { version: "desc" },
+      });
+    },
+  }),
+);
+
+builder.mutationField("submitPublicForm", (t) =>
+  t.field({
+    type: MutationResult,
+    args: {
+      slug: t.arg.string({ required: true }),
+      payload: t.arg({ type: "JSON", required: true }),
+    },
+    resolve: async (_root, args, ctx) => {
+      // No auth required — public form submission
+      const form = await ctx.prisma.formDefinition.findFirst({
+        where: { slug: args.slug, status: "published", isPublic: true },
+        orderBy: { version: "desc" },
+      });
+      if (!form) return mutationError(null, "Form not found or not public");
+
+      await ctx.prisma.formSubmission.create({
+        data: {
+          formId: form.id,
+          payload: args.payload as any,
+          submittedById: ctx.user?.id,
+        },
+      });
+      return mutationOk();
+    },
+  }),
+);
