@@ -46,16 +46,24 @@ export const NavUser = ({ ssrUser }: { ssrUser: CurrentUser | null }) => {
     setSentryUser(user ?? null);
   }, [user]);
 
-  const name = user?.profile?.username ?? "User";
+  const name = user?.name ?? "User";
   const email = user?.email ?? "";
   const avatar = "";
   const initials = name.slice(0, 2).toUpperCase();
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     setSentryUser(null);
     clearToken();
-    const apiRoot = process.env.NEXT_PUBLIC_API_ROOT ?? "";
-    window.location.href = `${apiRoot}/auth/logout`;
+    const apiRoot = process.env.NEXT_PUBLIC_API_ROOT ?? "http://localhost:4000";
+    try {
+      await fetch(`${apiRoot}/auth/logout`, {
+        method: "POST",
+        credentials: "include",
+      });
+    } catch {
+      // Best effort
+    }
+    window.location.href = "/auth/login";
   };
 
   return (
@@ -156,8 +164,8 @@ export const NavUser = ({ ssrUser }: { ssrUser: CurrentUser | null }) => {
                 SSR · getClient
               </p>
               <Row label="me.id" value={ssrUser?.id ?? "—"} />
-              <Row label="me.profile.id" value={ssrUser?.profile?.id ?? "—"} />
-              <Row label="me.profile.username" value={ssrUser?.profile?.username ?? "—"} />
+              <Row label="me.email" value={ssrUser?.email ?? "—"} />
+              <Row label="me.name" value={ssrUser?.name ?? "—"} />
             </section>
 
             <Separator />
@@ -168,8 +176,8 @@ export const NavUser = ({ ssrUser }: { ssrUser: CurrentUser | null }) => {
                 {meLoading && <span className="font-normal normal-case">loading…</span>}
               </p>
               <Row label="me.id" value={meData?.me?.id ?? "—"} />
-              <Row label="me.profile.id" value={meData?.me?.profile?.id ?? "—"} />
-              <Row label="me.profile.username" value={meData?.me?.profile?.username ?? "—"} />
+              <Row label="me.email" value={meData?.me?.email ?? "—"} />
+              <Row label="me.name" value={meData?.me?.name ?? "—"} />
             </section>
 
           </div>
