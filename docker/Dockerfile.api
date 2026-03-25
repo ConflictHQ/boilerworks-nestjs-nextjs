@@ -2,13 +2,20 @@ FROM node:20-alpine
 
 WORKDIR /app
 
+# Install dependencies
 COPY package.json ./
 RUN npm install
 
+# Copy source
 COPY . .
 
+# Generate Prisma client
 RUN npx prisma generate
+
+# Build
+RUN npx nest build
 
 EXPOSE 4000
 
-CMD ["npm", "run", "dev"]
+# Dev mode: run with watch
+CMD ["npx", "nest", "start", "--watch"]
