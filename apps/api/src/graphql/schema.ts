@@ -12,6 +12,8 @@ import "../workflows/workflows.resolver";
 import "../uploads/uploads.resolver";
 import "../notifications/notifications.resolver";
 import "../common/audit.resolver";
+import "../organizations/organizations.resolver";
+import "../auth/apikeys.resolver";
 
 // Register a simple health query to verify GraphQL is working
 builder.queryField("healthCheck", (t) =>
