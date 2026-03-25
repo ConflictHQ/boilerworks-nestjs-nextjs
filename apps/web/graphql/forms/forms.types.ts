@@ -1,12 +1,16 @@
 export type FormDefinition = {
+  id: string;
   name: string;
   slug: string;
-  description: string;
+  description: string | null;
   status: string;
   version: number;
   schema: Record<string, unknown>;
-  formType?: string;
-  isPublic?: boolean;
+  formType: string;
+  isPublic: boolean;
+  fieldConfig: Record<string, unknown>;
+  logicRules: unknown[];
+  scoring: Record<string, unknown> | null;
   publishedAt: string | null;
   createdAt: string;
   updatedAt: string;
@@ -14,13 +18,10 @@ export type FormDefinition = {
 };
 
 export type FormSubmission = {
+  id: string;
   payload: Record<string, unknown>;
   status: string;
   submittedAt: string;
-  createdAt: string;
-  formName: string;
-  formVersion: number;
-  formSlug: string;
 };
 
 export type FormDefinitionsData = {
@@ -35,21 +36,14 @@ export type FormSubmissionsData = {
   formSubmissions: FormSubmission[];
 };
 
-export type FormFieldTypesData = {
-  formFieldTypes: string[];
-};
-
-export type SubmitFormData = {
-  submitForm: {
-    ok: boolean;
-    submissionId: string | null;
-    errors: { field: string; messages: string[] }[];
-  };
+export type MutationError = {
+  field: string | null;
+  message: string;
 };
 
 export type MutationResultData = {
   [key: string]: {
     ok: boolean;
-    errors: { field: string; messages: string[] }[];
+    errors: MutationError[] | null;
   };
 };

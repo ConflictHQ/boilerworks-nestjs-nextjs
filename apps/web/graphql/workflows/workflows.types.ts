@@ -18,7 +18,7 @@ export type WorkflowDefinition = {
   name: string;
   slug: string;
   description: string | null;
-  modelLabel: string;
+  modelName: string;
   states: WorkflowState[];
   transitions: WorkflowTransition[];
   isEnabled: boolean;
