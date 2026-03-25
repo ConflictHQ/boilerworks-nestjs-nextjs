@@ -122,6 +122,9 @@ jobs:
       - name: Run migrations
         working-directory: apps/api
         run: npx prisma migrate deploy
+      - name: Seed database
+        working-directory: apps/api
+        run: npm run db:seed
       - name: Run tests
         working-directory: apps/api
         run: npx vitest --run
