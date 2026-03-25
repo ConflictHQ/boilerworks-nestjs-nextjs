@@ -4,6 +4,7 @@ import { PrismaService } from "../prisma/prisma.service";
 import { EmailService } from "../notifications/email.service";
 import { QUEUES } from "./queues";
 import type { WorkflowActionJobData } from "./job-dispatcher.service";
+import { validateWebhookUrl } from "../common/url-validator";
 
 @Processor(QUEUES.WORKFLOW_ACTIONS)
 export class WorkflowActionProcessor extends WorkerHost {
@@ -53,6 +54,7 @@ export class WorkflowActionProcessor extends WorkerHost {
       }
 
       case "call_webhook": {
+        validateWebhookUrl(action.url as string);
         const response = await fetch(action.url as string, {
           method: "POST",
           headers: { "Content-Type": "application/json" },

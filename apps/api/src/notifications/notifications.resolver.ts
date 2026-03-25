@@ -39,7 +39,7 @@ builder.mutationField("markNotificationRead", (t) =>
     resolve: async (_root, args, ctx) => {
       requireAuth(ctx);
       await ctx.prisma.notification.update({
-        where: { id: args.id },
+        where: { id: args.id, userId: ctx.user!.id },
         data: { isRead: true },
       });
       return mutationOk();

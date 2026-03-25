@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { createHmac } from "crypto";
+import { validateWebhookUrl } from "../common/url-validator";
 
 export type WebhookEvent =
   | "form.submitted"
@@ -37,6 +38,8 @@ export class WebhooksService {
    * Deliver a webhook to a URL with retry
    */
   async deliver(url: string, payload: Record<string, unknown>, secret: string) {
+    validateWebhookUrl(url);
+
     const body = JSON.stringify(payload);
     const signature = this.sign(body, secret);
 

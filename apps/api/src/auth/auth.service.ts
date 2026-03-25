@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { randomBytes, scryptSync, timingSafeEqual } from "crypto";
+import { randomBytes, scryptSync, timingSafeEqual, createHash } from "crypto";
 import { PrismaService } from "../prisma/prisma.service";
 
 @Injectable()
@@ -19,23 +19,29 @@ export class AuthService {
     return timingSafeEqual(hashBuffer, attempt);
   }
 
+  private hashSessionToken(token: string): string {
+    return createHash("sha256").update(token).digest("hex");
+  }
+
   async createSession(userId: string): Promise<{ token: string }> {
-    const token = randomBytes(32).toString("hex");
+    const rawToken = randomBytes(32).toString("hex");
+    const hashedToken = this.hashSessionToken(rawToken);
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 30);
 
     await this.prisma.session.create({
-      data: { userId, token, expiresAt },
+      data: { userId, token: hashedToken, expiresAt },
     });
 
-    return { token };
+    return { token: rawToken };
   }
 
   async validateSession(token: string) {
     if (!token) return null;
 
+    const hashedToken = this.hashSessionToken(token);
     const session = await this.prisma.session.findUnique({
-      where: { token },
+      where: { token: hashedToken },
       include: {
         user: {
           include: {
@@ -60,7 +66,8 @@ export class AuthService {
   }
 
   async destroySession(token: string) {
-    await this.prisma.session.deleteMany({ where: { token } });
+    const hashedToken = this.hashSessionToken(token);
+    await this.prisma.session.deleteMany({ where: { token: hashedToken } });
   }
 
   getEffectivePermissions(user: {
