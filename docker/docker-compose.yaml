@@ -12,17 +12,19 @@ services:
       S3_ACCESS_KEY: minioadmin
       S3_SECRET_KEY: minioadmin
       S3_BUCKET: boilerworks
-      MAIL_HOST: mailpit
-      MAIL_PORT: 1025
+      SMTP_HOST: mailpit
+      SMTP_PORT: 1025
+      CORS_ORIGINS: http://localhost:3000
       NODE_ENV: development
+      PORT: 4000
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
     volumes:
-      - ../apps/api:/app
-      - /app/node_modules
+      - ../apps/api/src:/app/src
+      - ../apps/api/prisma:/app/prisma
 
   web:
     build:
@@ -31,31 +33,17 @@ services:
     ports:
       - "3000:3000"
     environment:
-      NEXT_PUBLIC_API_URL: http://localhost:4000/graphql
+      NEXT_PUBLIC_API_ROOT: http://localhost:4000
       NODE_ENV: development
     volumes:
-      - ../apps/web:/app
-      - /app/node_modules
-      - /app/.next
-
-  worker:
-    build:
-      context: ../apps/api
-      dockerfile: ../../docker/Dockerfile.api
-    command: node dist/worker.js
-    environment:
-      DATABASE_URL: postgresql://dbadmin:dbadmin@postgres:5432/boilerworks
-      REDIS_URL: redis://redis:6379/0
-      S3_ENDPOINT: http://minio:9000
-      S3_ACCESS_KEY: minioadmin
-      S3_SECRET_KEY: minioadmin
-      MAIL_HOST: mailpit
-      MAIL_PORT: 1025
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
+      - ../apps/web/app:/app/app
+      - ../apps/web/components:/app/components
+      - ../apps/web/graphql:/app/graphql
+      - ../apps/web/hooks:/app/hooks
+      - ../apps/web/lib:/app/lib
+      - ../apps/web/i18n:/app/i18n
+      - ../apps/web/messages:/app/messages
+      - ../apps/web/public:/app/public
 
   postgres:
     image: postgres:16-alpine

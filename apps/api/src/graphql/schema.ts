@@ -6,6 +6,8 @@ import "./types";
 // Register domain types + resolvers
 import "../users/users.resolver";
 import "../permissions/permissions.resolver";
+import "../forms/forms.resolver";
+import "../workflows/workflows.resolver";
 
 // Register a simple health query to verify GraphQL is working
 builder.queryField("healthCheck", (t) =>
