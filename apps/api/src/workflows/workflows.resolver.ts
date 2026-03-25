@@ -1,5 +1,6 @@
 import { builder } from "../graphql/builder";
 import { requireAuth, requirePermission } from "../common/guards/auth";
+import { requireFeature } from "../config/features";
 import { MutationResult, mutationOk, mutationError } from "../graphql/types";
 
 // Import types (side-effect)
