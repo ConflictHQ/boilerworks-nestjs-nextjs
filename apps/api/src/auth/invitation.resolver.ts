@@ -2,6 +2,9 @@ import { builder } from "../graphql/builder";
 import { requireAuth, requirePermission } from "../common/guards/auth";
 import { MutationResult, mutationOk, mutationError } from "../graphql/types";
 import { randomBytes, createHash, scryptSync } from "crypto";
+import { EmailService } from "../notifications/email.service";
+
+const emailService = new EmailService();
 
 builder.mutationField("inviteUser", (t) =>
   t.field({
@@ -62,8 +65,8 @@ builder.mutationField("inviteUser", (t) =>
 
       const frontendUrl = process.env.CORS_ORIGINS?.split(",")[0] || "http://localhost:3000";
       const inviteUrl = `${frontendUrl}/auth/accept-invitation?token=${rawToken}`;
-      console.log(`Invitation URL for ${args.email}: ${inviteUrl}`);
-      // TODO: Send via EmailService
+
+      await emailService.sendInvitation(args.email, inviteUrl, ctx.user!.name);
 
       return mutationOk();
     },

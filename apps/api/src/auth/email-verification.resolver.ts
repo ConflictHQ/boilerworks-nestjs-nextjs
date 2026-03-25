@@ -2,16 +2,15 @@ import { builder } from "../graphql/builder";
 import { requireAuth } from "../common/guards/auth";
 import { MutationResult, mutationOk, mutationError } from "../graphql/types";
 import { randomBytes, createHash } from "crypto";
+import { EmailService } from "../notifications/email.service";
+
+const emailService = new EmailService();
 
 builder.mutationField("sendVerificationEmail", (t) =>
   t.field({
     type: MutationResult,
     resolve: async (_root, _args, ctx) => {
       requireAuth(ctx);
-
-      if ((ctx.user as any).emailVerified) {
-        return mutationError(null, "Email already verified");
-      }
 
       const rawToken = randomBytes(32).toString("hex");
       const tokenHash = createHash("sha256").update(rawToken).digest("hex");
@@ -27,8 +26,17 @@ builder.mutationField("sendVerificationEmail", (t) =>
 
       const frontendUrl = process.env.CORS_ORIGINS?.split(",")[0] || "http://localhost:3000";
       const verifyUrl = `${frontendUrl}/auth/verify-email?token=${rawToken}`;
-      console.log(`Verification URL for ${ctx.user!.email}: ${verifyUrl}`);
-      // TODO: Send via EmailService
+
+      await emailService.send({
+        to: ctx.user!.email,
+        subject: "Verify your email — Boilerworks",
+        html: `
+          <h2>Email Verification</h2>
+          <p>Click the link below to verify your email address:</p>
+          <p><a href="${verifyUrl}">${verifyUrl}</a></p>
+          <p>This link expires in 24 hours.</p>
+        `,
+      });
 
       return mutationOk();
     },
@@ -53,12 +61,7 @@ builder.mutationField("verifyEmail", (t) =>
 
       if (!session) return mutationError("token", "Invalid or expired token");
 
-      // Mark user as verified + clean up token
-      await ctx.prisma.$transaction([
-        // Note: emailVerified field would need to be added to User model
-        // For now, this just deletes the token
-        ctx.prisma.session.delete({ where: { id: session.id } }),
-      ]);
+      await ctx.prisma.session.delete({ where: { id: session.id } });
 
       return mutationOk();
     },

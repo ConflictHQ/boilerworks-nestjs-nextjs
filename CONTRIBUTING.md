@@ -11,8 +11,14 @@ Thanks for your interest in contributing. This document covers everything you ne
 ```shell
 git clone https://github.com/ConflictHQ/boilerworks-ts.git
 cd boilerworks-ts
-cp .env.example .env
+cp local.env.example local.env   # Edit with your Auth0 credentials
 npm install
+./run.sh up                       # Starts Docker + runs migrations
+./run.sh seed                     # Loads dev fixtures
+```
+
+Or manually:
+```shell
 docker compose -f docker/docker-compose.yaml up -d
 cd apps/api && npx prisma migrate dev && npx tsx prisma/seed.ts
 ```
