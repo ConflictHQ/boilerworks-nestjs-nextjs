@@ -3,6 +3,7 @@ import { gql } from "@apollo/client";
 export const GET_FORM_DEFINITIONS = gql`
   query GetFormDefinitions($status: String) {
     formDefinitions(status: $status) {
+      id
       name
       slug
       description
@@ -21,6 +22,7 @@ export const GET_FORM_DEFINITIONS = gql`
 export const GET_FORM_DEFINITION = gql`
   query GetFormDefinition($slug: String!) {
     formDefinition(slug: $slug) {
+      id
       name
       slug
       description
@@ -41,21 +43,12 @@ export const GET_FORM_DEFINITION = gql`
 `;
 
 export const GET_FORM_SUBMISSIONS = gql`
-  query GetFormSubmissions($slug: String!, $status: String) {
-    formSubmissions(slug: $slug, status: $status) {
+  query GetFormSubmissions($formId: String!) {
+    formSubmissions(formId: $formId) {
+      id
       payload
       status
       submittedAt
-      createdAt
-      formName
-      formVersion
-      formSlug
     }
-  }
-`;
-
-export const GET_FORM_FIELD_TYPES = gql`
-  query GetFormFieldTypes {
-    formFieldTypes
   }
 `;

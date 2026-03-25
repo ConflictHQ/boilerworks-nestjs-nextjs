@@ -61,6 +61,19 @@ services:
       timeout: 3s
       retries: 5
 
+  studio:
+    build:
+      context: ../apps/api
+      dockerfile: ../../docker/Dockerfile.api
+    command: npx prisma studio --port 5555 --hostname 0.0.0.0
+    ports:
+      - "5555:5555"
+    env_file:
+      - ../local.env
+    depends_on:
+      postgres:
+        condition: service_healthy
+
   minio:
     image: minio/minio
     command: server /data --console-address ":9001"

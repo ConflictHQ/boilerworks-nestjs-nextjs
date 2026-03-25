@@ -1,16 +1,16 @@
 import { gql } from "@apollo/client";
 
 export const GET_WORKFLOWS = gql`
-  query GetWorkflows($modelLabel: String) {
-    workflowDefinitions(modelLabel: $modelLabel) {
+  query GetWorkflows($modelName: String) {
+    workflowDefinitions(modelName: $modelName) {
+      id
       name
       slug
       description
-      modelLabel
+      modelName
       isEnabled
       createdAt
       instanceCount
-      activeInstanceCount
     }
   }
 `;
@@ -18,16 +18,16 @@ export const GET_WORKFLOWS = gql`
 export const GET_WORKFLOW = gql`
   query GetWorkflow($slug: String!) {
     workflowDefinition(slug: $slug) {
+      id
       name
       slug
       description
-      modelLabel
+      modelName
       states
       transitions
       isEnabled
       createdAt
       instanceCount
-      activeInstanceCount
     }
   }
 `;

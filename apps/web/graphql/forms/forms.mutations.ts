@@ -1,61 +1,94 @@
 import { gql } from "@apollo/client";
 
 export const CREATE_FORM_DEFINITION = gql`
-  mutation CreateFormDefinition($input: FormDefinitionInput!) {
-    createFormDefinition(input: $input) {
+  mutation CreateFormDefinition(
+    $name: String!
+    $slug: String!
+    $description: String
+    $formType: String
+    $isPublic: Boolean
+    $schema: JSON
+    $fieldConfig: JSON
+    $logicRules: JSON
+  ) {
+    createFormDefinition(
+      name: $name
+      slug: $slug
+      description: $description
+      formType: $formType
+      isPublic: $isPublic
+      schema: $schema
+      fieldConfig: $fieldConfig
+      logicRules: $logicRules
+    ) {
       ok
       errors {
         field
-        messages
+        message
+      }
+    }
+  }
+`;
+
+export const UPDATE_FORM_DEFINITION = gql`
+  mutation UpdateFormDefinition(
+    $id: String!
+    $name: String
+    $description: String
+    $schema: JSON
+    $fieldConfig: JSON
+    $logicRules: JSON
+    $isPublic: Boolean
+  ) {
+    updateFormDefinition(
+      id: $id
+      name: $name
+      description: $description
+      schema: $schema
+      fieldConfig: $fieldConfig
+      logicRules: $logicRules
+      isPublic: $isPublic
+    ) {
+      ok
+      errors {
+        field
+        message
       }
     }
   }
 `;
 
 export const PUBLISH_FORM = gql`
-  mutation PublishForm($slug: String!) {
-    publishForm(slug: $slug) {
+  mutation PublishFormDefinition($id: String!) {
+    publishFormDefinition(id: $id) {
       ok
       errors {
         field
-        messages
+        message
       }
     }
   }
 `;
 
 export const ARCHIVE_FORM = gql`
-  mutation ArchiveForm($slug: String!) {
-    archiveForm(slug: $slug) {
+  mutation ArchiveFormDefinition($id: String!) {
+    archiveFormDefinition(id: $id) {
       ok
       errors {
         field
-        messages
+        message
       }
     }
   }
 `;
 
 export const SUBMIT_FORM = gql`
-  mutation SubmitForm($slug: String!, $payload: JSON!) {
-    submitForm(slug: $slug, payload: $payload) {
-      ok
-      submissionId
-      errors {
-        field
-        messages
-      }
-    }
-  }
-`;
-
-export const UPDATE_SUBMISSION_STATUS = gql`
-  mutation UpdateSubmissionStatus($submissionId: ID!, $status: String!) {
-    updateSubmissionStatus(submissionId: $submissionId, status: $status) {
+  mutation SubmitForm($formId: String!, $payload: JSON!) {
+    submitForm(formId: $formId, payload: $payload) {
       ok
       errors {
         field
-        messages
+        message
       }
     }
   }

@@ -4,7 +4,7 @@ export const CREATE_WORKFLOW = gql`
   mutation CreateWorkflowDefinition(
     $name: String!
     $slug: String!
-    $modelLabel: String!
+    $modelName: String!
     $states: JSON!
     $transitions: JSON!
     $description: String
@@ -13,7 +13,7 @@ export const CREATE_WORKFLOW = gql`
     createWorkflowDefinition(
       name: $name
       slug: $slug
-      modelLabel: $modelLabel
+      modelName: $modelName
       states: $states
       transitions: $transitions
       description: $description
@@ -22,7 +22,7 @@ export const CREATE_WORKFLOW = gql`
       ok
       errors {
         field
-        messages
+        message
       }
     }
   }
@@ -33,7 +33,7 @@ export const UPDATE_WORKFLOW = gql`
     $slug: String!
     $name: String
     $description: String
-    $modelLabel: String
+    $modelName: String
     $states: JSON
     $transitions: JSON
     $isEnabled: Boolean
@@ -42,7 +42,7 @@ export const UPDATE_WORKFLOW = gql`
       slug: $slug
       name: $name
       description: $description
-      modelLabel: $modelLabel
+      modelName: $modelName
       states: $states
       transitions: $transitions
       isEnabled: $isEnabled
@@ -50,7 +50,7 @@ export const UPDATE_WORKFLOW = gql`
       ok
       errors {
         field
-        messages
+        message
       }
     }
   }
@@ -62,20 +62,19 @@ export const DELETE_WORKFLOW = gql`
       ok
       errors {
         field
-        messages
+        message
       }
     }
   }
 `;
 
 export const START_WORKFLOW = gql`
-  mutation StartWorkflow($workflowSlug: String!, $modelLabel: String!, $objectId: Int!) {
-    startWorkflow(workflowSlug: $workflowSlug, modelLabel: $modelLabel, objectId: $objectId) {
+  mutation StartWorkflow($workflowSlug: String!, $targetModel: String!, $targetId: String!) {
+    startWorkflow(workflowSlug: $workflowSlug, targetModel: $targetModel, targetId: $targetId) {
       ok
-      instanceId
       errors {
         field
-        messages
+        message
       }
     }
   }
@@ -87,7 +86,7 @@ export const TRANSITION_WORKFLOW = gql`
       ok
       errors {
         field
-        messages
+        message
       }
     }
   }

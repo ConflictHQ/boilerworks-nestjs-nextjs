@@ -2,24 +2,21 @@ import { useMutation, useQuery } from "@apollo/client/react";
 
 import {
   CREATE_FORM_DEFINITION,
+  UPDATE_FORM_DEFINITION,
   PUBLISH_FORM,
   ARCHIVE_FORM,
   SUBMIT_FORM,
-  UPDATE_SUBMISSION_STATUS,
 } from "./forms.mutations";
 import {
   GET_FORM_DEFINITION,
   GET_FORM_DEFINITIONS,
-  GET_FORM_FIELD_TYPES,
   GET_FORM_SUBMISSIONS,
 } from "./forms.queries";
 import type {
   FormDefinitionData,
   FormDefinitionsData,
-  FormFieldTypesData,
   FormSubmissionsData,
   MutationResultData,
-  SubmitFormData,
 } from "./forms.types";
 
 export const useFormDefinitions = (status?: string) => {
@@ -39,24 +36,22 @@ export const useFormDefinition = (slug: string) => {
   return { form: data?.formDefinition ?? null, loading, error };
 };
 
-export const useFormSubmissions = (slug: string, status?: string) => {
+export const useFormSubmissions = (formId: string) => {
   const { data, loading, error, refetch } = useQuery<FormSubmissionsData>(GET_FORM_SUBMISSIONS, {
-    variables: { slug, status },
+    variables: { formId },
     fetchPolicy: "cache-and-network",
-    skip: !slug,
+    skip: !formId,
   });
   return { submissions: data?.formSubmissions ?? [], loading, error, refetch };
 };
 
-export const useFormFieldTypes = () => {
-  const { data, loading } = useQuery<FormFieldTypesData>(GET_FORM_FIELD_TYPES, {
-    fetchPolicy: "cache-first",
-  });
-  return { fieldTypes: data?.formFieldTypes ?? [], loading };
-};
-
 export const useCreateFormDefinition = () =>
   useMutation<MutationResultData>(CREATE_FORM_DEFINITION, {
+    refetchQueries: [GET_FORM_DEFINITIONS],
+  });
+
+export const useUpdateFormDefinition = () =>
+  useMutation<MutationResultData>(UPDATE_FORM_DEFINITION, {
     refetchQueries: [GET_FORM_DEFINITIONS],
   });
 
@@ -71,7 +66,4 @@ export const useArchiveForm = () =>
   });
 
 export const useSubmitForm = () =>
-  useMutation<SubmitFormData>(SUBMIT_FORM);
-
-export const useUpdateSubmissionStatus = () =>
-  useMutation<MutationResultData>(UPDATE_SUBMISSION_STATUS);
+  useMutation<MutationResultData>(SUBMIT_FORM);
