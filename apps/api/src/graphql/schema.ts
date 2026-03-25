@@ -8,6 +8,9 @@ import "../users/users.resolver";
 import "../permissions/permissions.resolver";
 import "../forms/forms.resolver";
 import "../workflows/workflows.resolver";
+import "../uploads/uploads.resolver";
+import "../notifications/notifications.resolver";
+import "../common/audit.resolver";
 
 // Register a simple health query to verify GraphQL is working
 builder.queryField("healthCheck", (t) =>
