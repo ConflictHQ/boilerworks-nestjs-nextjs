@@ -6,6 +6,7 @@ import "./types";
 // Register domain types + resolvers
 import "../users/users.resolver";
 import "../permissions/permissions.resolver";
+import "../permissions/permissions.debug";
 import "../forms/forms.resolver";
 import "../workflows/workflows.resolver";
 import "../uploads/uploads.resolver";
