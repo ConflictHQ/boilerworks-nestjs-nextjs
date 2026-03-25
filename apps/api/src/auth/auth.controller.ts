@@ -101,10 +101,18 @@ export class AuthController {
     });
 
     if (!user) {
+      // Auto-assign new users to the Viewer group by default
+      const defaultGroup = await this.prisma.group.findUnique({
+        where: { name: "Viewer" },
+      });
+
       user = await this.prisma.user.create({
         data: {
           email: userInfo.email,
           name: userInfo.name || userInfo.nickname || userInfo.email,
+          ...(defaultGroup
+            ? { groups: { create: { groupId: defaultGroup.id } } }
+            : {}),
         },
       });
     }
