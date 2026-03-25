@@ -1,21 +1,22 @@
 import { All, Controller, Req, Res } from "@nestjs/common";
 import { createYoga } from "graphql-yoga";
 import { schema } from "./schema";
+import { createContext } from "./context";
 import type { Request, Response } from "express";
 
 const yoga = createYoga({
   schema,
   graphqlEndpoint: "/graphql",
   landingPage: true,
+  context: ({ request }) => createContext(request),
 });
 
 @Controller("graphql")
 export class GraphqlController {
   @All()
   async handler(@Req() req: Request, @Res() res: Response) {
-    // Build a Web Request from the Node request
     const url = new URL(req.url || "/", `http://${req.headers.host}`);
-    const webReq = new Request(url.toString(), {
+    const webReq = new globalThis.Request(url.toString(), {
       method: req.method,
       headers: req.headers as Record<string, string>,
       body:

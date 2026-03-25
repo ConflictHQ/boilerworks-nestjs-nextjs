@@ -1,5 +1,8 @@
 import { builder } from "./builder";
 
+// Register domain types + resolvers
+import "../users/users.resolver";
+
 // Register a simple health query to verify GraphQL is working
 builder.queryField("healthCheck", (t) =>
   t.string({

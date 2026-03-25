@@ -3,11 +3,13 @@ import PrismaPlugin from "@pothos/plugin-prisma";
 import RelayPlugin from "@pothos/plugin-relay";
 import type PrismaTypes from "@pothos/plugin-prisma/generated";
 import { Prisma, PrismaClient } from "@prisma/client";
+import type { GraphQLContext } from "./context";
 
 const prisma = new PrismaClient();
 
 export const builder = new SchemaBuilder<{
   PrismaTypes: PrismaTypes;
+  Context: GraphQLContext;
   Scalars: {
     DateTime: { Input: Date; Output: Date };
     JSON: { Input: unknown; Output: unknown };
