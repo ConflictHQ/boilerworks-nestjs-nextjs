@@ -1,8 +1,8 @@
 import { builder } from "../graphql/builder";
 
-builder.prismaObject("AuditLog", {
+builder.prismaNode("AuditLog", {
+  id: { field: "id" },
   fields: (t) => ({
-    id: t.exposeID("id"),
     action: t.exposeString("action"),
     targetType: t.exposeString("targetType", { nullable: true }),
     targetId: t.exposeString("targetId", { nullable: true }),

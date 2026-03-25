@@ -1,8 +1,8 @@
 import { builder } from "../graphql/builder";
 
-builder.prismaObject("FormDefinition", {
+builder.prismaNode("FormDefinition", {
+  id: { field: "id" },
   fields: (t) => ({
-    id: t.exposeID("id"),
     name: t.exposeString("name"),
     slug: t.exposeString("slug"),
     description: t.exposeString("description", { nullable: true }),
@@ -24,9 +24,9 @@ builder.prismaObject("FormDefinition", {
   }),
 });
 
-builder.prismaObject("FormSubmission", {
+builder.prismaNode("FormSubmission", {
+  id: { field: "id" },
   fields: (t) => ({
-    id: t.exposeID("id"),
     payload: t.expose("payload", { type: "JSON" }),
     status: t.exposeString("status"),
     submittedAt: t.expose("submittedAt", { type: "DateTime" }),

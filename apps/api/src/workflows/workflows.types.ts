@@ -1,8 +1,8 @@
 import { builder } from "../graphql/builder";
 
-builder.prismaObject("WorkflowDefinition", {
+builder.prismaNode("WorkflowDefinition", {
+  id: { field: "id" },
   fields: (t) => ({
-    id: t.exposeID("id"),
     name: t.exposeString("name"),
     slug: t.exposeString("slug"),
     description: t.exposeString("description", { nullable: true }),
@@ -16,9 +16,9 @@ builder.prismaObject("WorkflowDefinition", {
   }),
 });
 
-builder.prismaObject("WorkflowInstance", {
+builder.prismaNode("WorkflowInstance", {
+  id: { field: "id" },
   fields: (t) => ({
-    id: t.exposeID("id"),
     targetModel: t.exposeString("targetModel"),
     targetId: t.exposeString("targetId"),
     currentState: t.exposeString("currentState"),
@@ -29,9 +29,9 @@ builder.prismaObject("WorkflowInstance", {
   }),
 });
 
-builder.prismaObject("TransitionLog", {
+builder.prismaNode("TransitionLog", {
+  id: { field: "id" },
   fields: (t) => ({
-    id: t.exposeID("id"),
     fromState: t.exposeString("fromState"),
     toState: t.exposeString("toState"),
     note: t.exposeString("note"),

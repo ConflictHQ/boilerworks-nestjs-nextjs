@@ -1,8 +1,8 @@
 import { builder } from "../graphql/builder";
 
-builder.prismaObject("ApiKey", {
+builder.prismaNode("ApiKey", {
+  id: { field: "id" },
   fields: (t) => ({
-    id: t.exposeID("id"),
     name: t.exposeString("name"),
     keyPrefix: t.exposeString("keyPrefix"),
     permissions: t.expose("permissions", { type: "JSON" }),

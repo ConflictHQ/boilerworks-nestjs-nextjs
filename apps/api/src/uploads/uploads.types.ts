@@ -1,8 +1,8 @@
 import { builder } from "../graphql/builder";
 
-builder.prismaObject("Upload", {
+builder.prismaNode("Upload", {
+  id: { field: "id" },
   fields: (t) => ({
-    id: t.exposeID("id"),
     filename: t.exposeString("filename"),
     contentType: t.exposeString("contentType"),
     size: t.exposeInt("size"),
