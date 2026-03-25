@@ -102,7 +102,8 @@ builder.mutationField("updateUser", (t) =>
 
       const data: Record<string, unknown> = {};
       if (args.name !== undefined && args.name !== null) data.name = args.name;
-      if (args.email !== undefined && args.email !== null) data.email = args.email;
+      if (args.email !== undefined && args.email !== null)
+        data.email = args.email;
 
       try {
         await ctx.prisma.user.update({

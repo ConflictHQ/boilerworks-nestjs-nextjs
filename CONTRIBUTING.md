@@ -18,6 +18,7 @@ npm install
 ```
 
 Or manually:
+
 ```shell
 docker compose -f docker/docker-compose.yaml up -d
 cd apps/api && npx prisma migrate dev && npx tsx prisma/seed.ts

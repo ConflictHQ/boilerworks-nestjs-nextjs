@@ -24,7 +24,9 @@ export class WebhookProcessor extends WorkerHost {
     });
 
     if (!response.ok) {
-      throw new Error(`Webhook delivery failed: ${response.status} ${response.statusText}`);
+      throw new Error(
+        `Webhook delivery failed: ${response.status} ${response.statusText}`,
+      );
     }
 
     console.log(`[Webhook] Delivered to ${url}: ${response.status}`);

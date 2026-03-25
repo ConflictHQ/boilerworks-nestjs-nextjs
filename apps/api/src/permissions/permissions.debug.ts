@@ -62,24 +62,48 @@ builder.queryField("permissionDiagnose", (t) =>
           granted: false,
           userId: args.userId,
           action: args.action,
-          chain: [{ level: "user", name: args.userId, granted: false, reason: "User not found" }],
+          chain: [
+            {
+              level: "user",
+              name: args.userId,
+              granted: false,
+              reason: "User not found",
+            },
+          ],
         };
       }
 
-      const chain: Array<{ level: string; name: string; granted: boolean; reason: string }> = [];
+      const chain: Array<{
+        level: string;
+        name: string;
+        granted: boolean;
+        reason: string;
+      }> = [];
 
       // Check superuser
       if (user.isSuperuser) {
-        chain.push({ level: "superuser", name: user.email, granted: true, reason: "User is superuser — bypasses all checks" });
+        chain.push({
+          level: "superuser",
+          name: user.email,
+          granted: true,
+          reason: "User is superuser — bypasses all checks",
+        });
         return { granted: true, userId: user.id, action: args.action, chain };
       }
 
-      chain.push({ level: "superuser", name: user.email, granted: false, reason: "User is not superuser" });
+      chain.push({
+        level: "superuser",
+        name: user.email,
+        granted: false,
+        reason: "User is not superuser",
+      });
 
       // Check groups
       for (const ug of user.groups) {
         const group = ug.group;
-        const hasPerm = group.permissions.some((gp) => gp.permission.slug === args.action);
+        const hasPerm = group.permissions.some(
+          (gp) => gp.permission.slug === args.action,
+        );
         chain.push({
           level: "group",
           name: group.name,
@@ -92,7 +116,12 @@ builder.queryField("permissionDiagnose", (t) =>
 
       const granted = chain.some((step) => step.granted);
       if (!granted && user.groups.length === 0) {
-        chain.push({ level: "group", name: "(none)", granted: false, reason: "User is not a member of any group" });
+        chain.push({
+          level: "group",
+          name: "(none)",
+          granted: false,
+          reason: "User is not a member of any group",
+        });
       }
 
       return { granted, userId: user.id, action: args.action, chain };
@@ -141,7 +170,10 @@ builder.queryField("effectivePermissions", (t) =>
         for (const gp of ug.group.permissions) {
           if (!seen.has(gp.permission.slug)) {
             seen.add(gp.permission.slug);
-            result.push({ slug: gp.permission.slug, grantedVia: ug.group.name });
+            result.push({
+              slug: gp.permission.slug,
+              grantedVia: ug.group.name,
+            });
           }
         }
       }

@@ -14,17 +14,17 @@ Full-stack TypeScript boilerplate for building SaaS products. NestJS backend + N
 
 ## Key architectural decisions
 
-| Decision | Why |
-|---|---|
-| GraphQL (Pothos + Yoga) as primary API | Flexible querying from Next.js frontend; Pothos gives type-safe schema building with Prisma integration |
-| Auth0 + backend session | Auth0 handles identity/login; backend creates local session stored in httpOnly cookie; same Auth0 tenant as Django edition |
-| `cuid()` IDs on all models | Never expose sequential integer IDs; cuid is URL-safe and collision-resistant |
-| Soft deletes via `deletedAt` | Compliance + audit requirement; never hard-delete business objects |
-| Group-based RBAC, never direct user permissions | Simpler mental model; permission changes propagate via group membership |
-| BullMQ + Redis for async jobs | NestJS-native, proven at scale; BullMQ is in deps but processors not yet implemented — actions run synchronously |
-| Prisma ORM (not TypeORM, Drizzle) | Best type-safety story, excellent migration tooling, Pothos plugin |
-| Monorepo with Turborepo | Shared types between API and frontend; single CI pipeline; independent builds |
-| `bootstrap.md` as primary conventions doc | Single source of truth for all agents and humans; agent shims point here |
+| Decision                                        | Why                                                                                                                        |
+| ----------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| GraphQL (Pothos + Yoga) as primary API          | Flexible querying from Next.js frontend; Pothos gives type-safe schema building with Prisma integration                    |
+| Auth0 + backend session                         | Auth0 handles identity/login; backend creates local session stored in httpOnly cookie; same Auth0 tenant as Django edition |
+| `cuid()` IDs on all models                      | Never expose sequential integer IDs; cuid is URL-safe and collision-resistant                                              |
+| Soft deletes via `deletedAt`                    | Compliance + audit requirement; never hard-delete business objects                                                         |
+| Group-based RBAC, never direct user permissions | Simpler mental model; permission changes propagate via group membership                                                    |
+| BullMQ + Redis for async jobs                   | NestJS-native, proven at scale; BullMQ is in deps but processors not yet implemented — actions run synchronously           |
+| Prisma ORM (not TypeORM, Drizzle)               | Best type-safety story, excellent migration tooling, Pothos plugin                                                         |
+| Monorepo with Turborepo                         | Shared types between API and frontend; single CI pipeline; independent builds                                              |
+| `bootstrap.md` as primary conventions doc       | Single source of truth for all agents and humans; agent shims point here                                                   |
 
 ---
 

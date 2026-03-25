@@ -3,12 +3,26 @@ import { builder } from "../graphql/builder";
 // Rule definition stored in DB as JSON
 export type RuleCondition = {
   field: string;
-  operator: "equals" | "not_equals" | "gt" | "lt" | "contains" | "in" | "not_in" | "is_empty" | "is_not_empty";
+  operator:
+    | "equals"
+    | "not_equals"
+    | "gt"
+    | "lt"
+    | "contains"
+    | "in"
+    | "not_in"
+    | "is_empty"
+    | "is_not_empty";
   value?: unknown;
 };
 
 export type RuleAction = {
-  type: "send_email" | "notify_user" | "call_webhook" | "update_field" | "enqueue_job";
+  type:
+    | "send_email"
+    | "notify_user"
+    | "call_webhook"
+    | "update_field"
+    | "enqueue_job";
   to?: string;
   subject?: string;
   message?: string;

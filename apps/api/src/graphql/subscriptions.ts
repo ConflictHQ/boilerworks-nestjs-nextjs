@@ -1,11 +1,14 @@
-import { builder } from "./builder";
 import { createPubSub } from "graphql-yoga";
 
 // PubSub instance for GraphQL subscriptions
 // In production, use Redis-backed pub/sub for multi-instance support
 export const pubsub = createPubSub<{
-  "notification:created": [{ userId: string; subject: string; message: string }];
-  "workflow:transitioned": [{ instanceId: string; fromState: string; toState: string }];
+  "notification:created": [
+    { userId: string; subject: string; message: string },
+  ];
+  "workflow:transitioned": [
+    { instanceId: string; fromState: string; toState: string },
+  ];
   "form:submitted": [{ formId: string; submissionId: string }];
 }>();
 

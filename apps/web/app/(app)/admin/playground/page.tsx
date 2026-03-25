@@ -15,16 +15,18 @@ export default function PlaygroundPage() {
       </div>
       <Separator />
 
-      <div className="rounded-lg border overflow-hidden" style={{ height: "calc(100vh - 220px)" }}>
+      <div className="overflow-hidden rounded-lg border" style={{ height: "calc(100vh - 220px)" }}>
         <iframe
           src={`${apiRoot}/graphql`}
-          className="w-full h-full border-0"
+          className="h-full w-full border-0"
           title="GraphQL Playground"
         />
       </div>
 
       <div className="text-muted-foreground text-xs">
-        <p>GraphQL endpoint: <code className="font-mono">{apiRoot}/graphql</code></p>
+        <p>
+          GraphQL endpoint: <code className="font-mono">{apiRoot}/graphql</code>
+        </p>
         <p>The playground uses your current session for authentication.</p>
       </div>
     </div>

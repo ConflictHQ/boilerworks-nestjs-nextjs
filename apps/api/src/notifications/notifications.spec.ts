@@ -17,7 +17,9 @@ describe("Notifications", () => {
 
   afterAll(async () => {
     if (notificationId) {
-      await prisma.notification.delete({ where: { id: notificationId } }).catch(() => {});
+      await prisma.notification
+        .delete({ where: { id: notificationId } })
+        .catch(() => {});
     }
     await prisma.$disconnect();
   });

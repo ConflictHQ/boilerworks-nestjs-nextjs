@@ -3,7 +3,9 @@ import type { GraphQLContext } from "../../graphql/context";
 
 export function requireAuth(
   ctx: GraphQLContext,
-): asserts ctx is GraphQLContext & { user: NonNullable<GraphQLContext["user"]> } {
+): asserts ctx is GraphQLContext & {
+  user: NonNullable<GraphQLContext["user"]>;
+} {
   if (!ctx.user) {
     throw new GraphQLError("Authentication required", {
       extensions: { code: "UNAUTHENTICATED" },

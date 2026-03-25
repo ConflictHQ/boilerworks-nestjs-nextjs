@@ -16,7 +16,9 @@ export class WorkflowActionProcessor extends WorkerHost {
 
   async process(job: Job<WorkflowActionJobData>) {
     const { action, instanceId, fromState, toState, userId } = job.data;
-    console.log(`[WorkflowAction] Processing ${action.type} for instance ${instanceId}`);
+    console.log(
+      `[WorkflowAction] Processing ${action.type} for instance ${instanceId}`,
+    );
 
     switch (action.type) {
       case "notify_user": {
@@ -25,8 +27,12 @@ export class WorkflowActionProcessor extends WorkerHost {
           await this.prisma.notification.create({
             data: {
               userId: targetUserId,
-              subject: (action.subject as string) || `Workflow transitioned: ${fromState} → ${toState}`,
-              message: (action.message as string) || `Instance ${instanceId} moved from ${fromState} to ${toState}.`,
+              subject:
+                (action.subject as string) ||
+                `Workflow transitioned: ${fromState} → ${toState}`,
+              message:
+                (action.message as string) ||
+                `Instance ${instanceId} moved from ${fromState} to ${toState}.`,
             },
           });
         }
@@ -36,8 +42,12 @@ export class WorkflowActionProcessor extends WorkerHost {
       case "send_email": {
         await this.email.send({
           to: action.to as string,
-          subject: (action.subject as string) || `Workflow transition: ${fromState} → ${toState}`,
-          html: (action.message as string) || `<p>Instance ${instanceId} transitioned from ${fromState} to ${toState}.</p>`,
+          subject:
+            (action.subject as string) ||
+            `Workflow transition: ${fromState} → ${toState}`,
+          html:
+            (action.message as string) ||
+            `<p>Instance ${instanceId} transitioned from ${fromState} to ${toState}.</p>`,
         });
         break;
       }
@@ -46,10 +56,18 @@ export class WorkflowActionProcessor extends WorkerHost {
         const response = await fetch(action.url as string, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ instanceId, fromState, toState, userId, action }),
+          body: JSON.stringify({
+            instanceId,
+            fromState,
+            toState,
+            userId,
+            action,
+          }),
         });
         if (!response.ok) {
-          throw new Error(`Webhook failed: ${response.status} ${response.statusText}`);
+          throw new Error(
+            `Webhook failed: ${response.status} ${response.statusText}`,
+          );
         }
         break;
       }
@@ -60,7 +78,9 @@ export class WorkflowActionProcessor extends WorkerHost {
           where: { id: instanceId },
         });
         if (instance) {
-          console.log(`[WorkflowAction] Would update ${instance.targetModel}:${instance.targetId} field ${action.field} = ${action.value}`);
+          console.log(
+            `[WorkflowAction] Would update ${instance.targetModel}:${instance.targetId} field ${action.field} = ${action.value}`,
+          );
           // Actual update depends on targetModel — implement per-model
         }
         break;

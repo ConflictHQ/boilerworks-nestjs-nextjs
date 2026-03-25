@@ -16,11 +16,14 @@ export class WebhooksService {
   async dispatch(
     event: WebhookEvent,
     payload: Record<string, unknown>,
-    prisma: any,
+    _prisma: any,
   ) {
     // Find all active endpoints subscribed to this event
     // For now this is a no-op — will implement when WebhookEndpoint model is added
-    console.log(`[Webhook] Event: ${event}`, JSON.stringify(payload).substring(0, 200));
+    console.log(
+      `[Webhook] Event: ${event}`,
+      JSON.stringify(payload).substring(0, 200),
+    );
   }
 
   /**

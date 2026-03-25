@@ -45,9 +45,7 @@ async function main() {
       update: {},
       create: {
         slug,
-        name: slug
-          .replace(".", " ")
-          .replace(/\b\w/g, (c) => c.toUpperCase()),
+        name: slug.replace(".", " ").replace(/\b\w/g, (c) => c.toUpperCase()),
       },
     });
   }
@@ -90,7 +88,12 @@ async function main() {
 
   // Assign view permissions to Editor + some edit
   const editorSlugs = permissionSlugs.filter(
-    (s) => s.includes(".view") || s.includes(".create") || s.includes(".edit") || s.includes(".submit") || s.includes(".transition"),
+    (s) =>
+      s.includes(".view") ||
+      s.includes(".create") ||
+      s.includes(".edit") ||
+      s.includes(".submit") ||
+      s.includes(".transition"),
   );
   for (const slug of editorSlugs) {
     const perm = allPermissions.find((p) => p.slug === slug);

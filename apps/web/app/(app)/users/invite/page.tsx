@@ -9,14 +9,22 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
 const GET_GROUPS = gql`
-  query GetGroups { groups { id name } }
+  query GetGroups {
+    groups {
+      id
+      name
+    }
+  }
 `;
 
 const INVITE_USER = gql`
   mutation InviteUser($email: String!, $groupIds: [String!]!) {
     inviteUser(email: $email, groupIds: $groupIds) {
       ok
-      errors { field message }
+      errors {
+        field
+        message
+      }
     }
   }
 `;
@@ -64,7 +72,9 @@ export default function InviteUserPage() {
 
       <form onSubmit={handleSubmit} className="max-w-md space-y-4">
         <div className="space-y-2">
-          <label htmlFor="email" className="text-sm font-medium">Email</label>
+          <label htmlFor="email" className="text-sm font-medium">
+            Email
+          </label>
           <input
             id="email"
             type="email"
@@ -87,9 +97,7 @@ export default function InviteUserPage() {
                   checked={selectedGroups.includes(group.id)}
                   onChange={(e) => {
                     setSelectedGroups((prev) =>
-                      e.target.checked
-                        ? [...prev, group.id]
-                        : prev.filter((id) => id !== group.id),
+                      e.target.checked ? [...prev, group.id] : prev.filter((id) => id !== group.id)
                     );
                   }}
                 />

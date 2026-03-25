@@ -15,7 +15,10 @@ builder.prismaNode("FormDefinition", {
     logicRules: t.expose("logicRules", { type: "JSON" }),
     scoring: t.expose("scoring", { type: "JSON", nullable: true }),
     prefill: t.expose("prefill", { type: "JSON", nullable: true }),
-    notificationConfig: t.expose("notificationConfig", { type: "JSON", nullable: true }),
+    notificationConfig: t.expose("notificationConfig", {
+      type: "JSON",
+      nullable: true,
+    }),
     publishedAt: t.expose("publishedAt", { type: "DateTime", nullable: true }),
     createdAt: t.expose("createdAt", { type: "DateTime" }),
     updatedAt: t.expose("updatedAt", { type: "DateTime" }),

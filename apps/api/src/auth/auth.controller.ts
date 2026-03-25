@@ -19,14 +19,12 @@ export class AuthController {
   // --- Auth0 OAuth2 flow ---
 
   @Get("login")
-  async loginRedirect(
-    @Query("next") next: string,
-    @Res() res: Response,
-  ) {
+  async loginRedirect(@Query("next") next: string, @Res() res: Response) {
     if (!AUTH0_CLIENT_ID) {
       // Auth0 not configured — show message
       return res.status(503).json({
-        error: "Auth0 not configured. Set AUTH0_CLIENT_ID and AUTH0_CLIENT_SECRET env vars.",
+        error:
+          "Auth0 not configured. Set AUTH0_CLIENT_ID and AUTH0_CLIENT_SECRET env vars.",
       });
     }
 
@@ -34,12 +32,16 @@ export class AuthController {
     const callbackUrl = `${process.env.CORS_ORIGINS?.split(",")[0] || "http://localhost:3000"}/auth/callback`;
 
     // Store the "next" URL and state in a short-lived cookie
-    res.cookie("auth_state", JSON.stringify({ state, next: next || "/dashboard" }), {
-      httpOnly: true,
-      maxAge: 5 * 60 * 1000, // 5 minutes
-      sameSite: "lax",
-      path: "/",
-    });
+    res.cookie(
+      "auth_state",
+      JSON.stringify({ state, next: next || "/dashboard" }),
+      {
+        httpOnly: true,
+        maxAge: 5 * 60 * 1000, // 5 minutes
+        sameSite: "lax",
+        path: "/",
+      },
+    );
 
     const auth0Url = new URL(`https://${AUTH0_DOMAIN}/authorize`);
     auth0Url.searchParams.set("response_type", "code");
@@ -66,7 +68,9 @@ export class AuthController {
     try {
       const authState = JSON.parse(req.cookies?.auth_state || "{}");
       if (!state || !authState.state || state !== authState.state) {
-        return res.status(403).json({ error: "Invalid state parameter — possible CSRF attack" });
+        return res
+          .status(403)
+          .json({ error: "Invalid state parameter — possible CSRF attack" });
       }
     } catch {
       return res.status(403).json({ error: "Invalid auth state" });
@@ -89,7 +93,9 @@ export class AuthController {
 
     if (!tokenResponse.ok) {
       const err = await tokenResponse.text();
-      return res.status(401).json({ error: "Auth0 token exchange failed", details: err });
+      return res
+        .status(401)
+        .json({ error: "Auth0 token exchange failed", details: err });
     }
 
     const tokens = await tokenResponse.json();
@@ -196,7 +202,8 @@ export class AuthController {
 
     // If Auth0 is configured, redirect to Auth0 logout
     if (AUTH0_CLIENT_ID) {
-      const returnTo = process.env.CORS_ORIGINS?.split(",")[0] || "http://localhost:3000";
+      const returnTo =
+        process.env.CORS_ORIGINS?.split(",")[0] || "http://localhost:3000";
       return res.json({
         ok: true,
         logoutUrl: `https://${AUTH0_DOMAIN}/v2/logout?client_id=${AUTH0_CLIENT_ID}&returnTo=${encodeURIComponent(returnTo + "/auth/login")}`,

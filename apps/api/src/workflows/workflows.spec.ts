@@ -29,9 +29,27 @@ describe("Workflow Engine", () => {
         slug: "test-workflow-spec",
         modelName: "TestModel",
         states: [
-          { name: "draft", label: "Draft", isInitial: true, isFinal: false, color: "#3b82f6" },
-          { name: "active", label: "Active", isInitial: false, isFinal: false, color: "#22c55e" },
-          { name: "done", label: "Done", isInitial: false, isFinal: true, color: "#6b7280" },
+          {
+            name: "draft",
+            label: "Draft",
+            isInitial: true,
+            isFinal: false,
+            color: "#3b82f6",
+          },
+          {
+            name: "active",
+            label: "Active",
+            isInitial: false,
+            isFinal: false,
+            color: "#22c55e",
+          },
+          {
+            name: "done",
+            label: "Done",
+            isInitial: false,
+            isFinal: true,
+            color: "#6b7280",
+          },
         ],
         transitions: [
           { fromState: "draft", toState: "active", label: "Activate" },

@@ -18,7 +18,7 @@ export class SearchService implements OnModuleInit {
     try {
       const { body } = await this.client.cluster.health();
       console.log(`[Search] OpenSearch cluster: ${body.status}`);
-    } catch (err) {
+    } catch {
       console.warn("[Search] OpenSearch not available — search disabled");
     }
   }
@@ -63,8 +63,15 @@ export class SearchService implements OnModuleInit {
   async search(
     model: string,
     query: string,
-    options?: { from?: number; size?: number; filters?: Record<string, unknown> },
-  ): Promise<{ hits: Array<{ id: string; score: number; source: Record<string, unknown> }>; total: number }> {
+    options?: {
+      from?: number;
+      size?: number;
+      filters?: Record<string, unknown>;
+    },
+  ): Promise<{
+    hits: Array<{ id: string; score: number; source: Record<string, unknown> }>;
+    total: number;
+  }> {
     const { from = 0, size = 20, filters } = options ?? {};
 
     const must: unknown[] = [
@@ -94,7 +101,10 @@ export class SearchService implements OnModuleInit {
     });
 
     return {
-      total: typeof body.hits.total === "number" ? body.hits.total : (body.hits.total as any)?.value ?? 0,
+      total:
+        typeof body.hits.total === "number"
+          ? body.hits.total
+          : ((body.hits.total as any)?.value ?? 0),
       hits: body.hits.hits.map((hit: any) => ({
         id: hit._id,
         score: hit._score,
@@ -103,7 +113,10 @@ export class SearchService implements OnModuleInit {
     };
   }
 
-  async reindex(model: string, documents: Array<{ id: string; data: Record<string, unknown> }>) {
+  async reindex(
+    model: string,
+    documents: Array<{ id: string; data: Record<string, unknown> }>,
+  ) {
     const index = this.indexName(model);
 
     // Delete and recreate
@@ -122,6 +135,8 @@ export class SearchService implements OnModuleInit {
     ]);
 
     await this.client.bulk({ body: bulkBody, refresh: true });
-    console.log(`[Search] Reindexed ${documents.length} documents into ${index}`);
+    console.log(
+      `[Search] Reindexed ${documents.length} documents into ${index}`,
+    );
   }
 }

@@ -14,7 +14,11 @@ const GET_AUDIT_LOGS = gql`
       payload
       ip
       timestamp
-      user { id name email }
+      user {
+        id
+        name
+        email
+      }
     }
   }
 `;
@@ -42,9 +46,7 @@ export default function AuditLogPage() {
     <div className="flex flex-1 flex-col gap-6 p-6">
       <div>
         <h1 className="text-xl font-semibold">Audit Log</h1>
-        <p className="text-muted-foreground mt-1 text-sm">
-          View all system actions and mutations.
-        </p>
+        <p className="text-muted-foreground mt-1 text-sm">View all system actions and mutations.</p>
       </div>
       <Separator />
 
@@ -64,8 +66,8 @@ export default function AuditLogPage() {
           </thead>
           <tbody>
             {logs.map((log) => (
-              <tr key={log.id} className="border-b last:border-0 text-sm">
-                <td className="p-3 text-muted-foreground">
+              <tr key={log.id} className="border-b text-sm last:border-0">
+                <td className="text-muted-foreground p-3">
                   {new Date(log.timestamp).toLocaleString()}
                 </td>
                 <td className="p-3">{log.user?.name ?? "System"}</td>
@@ -73,13 +75,13 @@ export default function AuditLogPage() {
                 <td className="p-3 font-mono text-xs">
                   {log.targetType && `${log.targetType}:${log.targetId}`}
                 </td>
-                <td className="p-3 text-muted-foreground">{log.ip ?? "—"}</td>
+                <td className="text-muted-foreground p-3">{log.ip ?? "—"}</td>
               </tr>
             ))}
           </tbody>
         </table>
         {logs.length === 0 && !loading && (
-          <p className="p-6 text-center text-sm text-muted-foreground">No audit logs yet.</p>
+          <p className="text-muted-foreground p-6 text-center text-sm">No audit logs yet.</p>
         )}
       </div>
     </div>

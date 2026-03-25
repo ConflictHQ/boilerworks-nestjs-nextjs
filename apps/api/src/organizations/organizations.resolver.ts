@@ -1,5 +1,5 @@
 import { builder } from "../graphql/builder";
-import { requireAuth, requirePermission } from "../common/guards/auth";
+import { requireAuth } from "../common/guards/auth";
 import { MutationResult, mutationOk, mutationError } from "../graphql/types";
 
 import "./organizations.types";
@@ -46,7 +46,11 @@ builder.mutationField("createOrganization", (t) =>
       const existing = await ctx.prisma.organization.findUnique({
         where: { slug: args.slug },
       });
-      if (existing) return mutationError("slug", "Organization with this slug already exists");
+      if (existing)
+        return mutationError(
+          "slug",
+          "Organization with this slug already exists",
+        );
 
       const org = await ctx.prisma.organization.create({
         data: { name: args.name, slug: args.slug },
@@ -82,8 +86,15 @@ builder.mutationField("addOrganizationMember", (t) =>
           },
         },
       });
-      if (!ctx.user!.isSuperuser && (!callerMembership || !["owner", "admin"].includes(callerMembership.role))) {
-        return mutationError(null, "Only organization admins or owners can add members");
+      if (
+        !ctx.user!.isSuperuser &&
+        (!callerMembership ||
+          !["owner", "admin"].includes(callerMembership.role))
+      ) {
+        return mutationError(
+          null,
+          "Only organization admins or owners can add members",
+        );
       }
 
       try {
@@ -121,8 +132,15 @@ builder.mutationField("removeOrganizationMember", (t) =>
           },
         },
       });
-      if (!ctx.user!.isSuperuser && (!callerMembership || !["owner", "admin"].includes(callerMembership.role))) {
-        return mutationError(null, "Only organization admins or owners can remove members");
+      if (
+        !ctx.user!.isSuperuser &&
+        (!callerMembership ||
+          !["owner", "admin"].includes(callerMembership.role))
+      ) {
+        return mutationError(
+          null,
+          "Only organization admins or owners can remove members",
+        );
       }
 
       await ctx.prisma.organizationMember.deleteMany({

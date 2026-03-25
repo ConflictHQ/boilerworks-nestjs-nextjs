@@ -22,11 +22,18 @@ export class PushService {
       this.enabled = true;
       console.log("[Push] Firebase initialized");
     } else {
-      console.log("[Push] Firebase not configured — push notifications disabled");
+      console.log(
+        "[Push] Firebase not configured — push notifications disabled",
+      );
     }
   }
 
-  async sendToUser(userId: string, title: string, body: string, data?: Record<string, string>) {
+  async sendToUser(
+    userId: string,
+    title: string,
+    _body: string,
+    _data?: Record<string, string>,
+  ) {
     if (!this.enabled) {
       console.log(`[Push] Would send to user ${userId}: ${title}`);
       return;
@@ -39,7 +46,7 @@ export class PushService {
     // }
   }
 
-  async sendToTopic(topic: string, title: string, body: string) {
+  async sendToTopic(topic: string, title: string, _body: string) {
     if (!this.enabled) {
       console.log(`[Push] Would send to topic ${topic}: ${title}`);
       return;
@@ -49,7 +56,11 @@ export class PushService {
     // await admin.messaging().send({ topic, notification: { title, body } });
   }
 
-  async registerToken(userId: string, token: string, platform: "ios" | "android" | "web") {
+  async registerToken(
+    userId: string,
+    token: string,
+    platform: "ios" | "android" | "web",
+  ) {
     // TODO: Store in DeviceToken table
     console.log(`[Push] Register token for ${userId}: ${platform}`);
   }

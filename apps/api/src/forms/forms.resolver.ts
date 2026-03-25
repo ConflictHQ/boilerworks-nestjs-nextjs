@@ -1,6 +1,6 @@
 import { builder } from "../graphql/builder";
 import { requireAuth, requirePermission } from "../common/guards/auth";
-import { requireFeature } from "../config/features";
+
 import { MutationResult, mutationOk, mutationError } from "../graphql/types";
 
 // Import types (side-effect)
@@ -85,7 +85,8 @@ builder.mutationField("createFormDefinition", (t) =>
       const existing = await ctx.prisma.formDefinition.findUnique({
         where: { slug_version: { slug: args.slug, version: 1 } },
       });
-      if (existing) return mutationError("slug", "A form with this slug already exists");
+      if (existing)
+        return mutationError("slug", "A form with this slug already exists");
 
       await ctx.prisma.formDefinition.create({
         data: {
@@ -125,7 +126,10 @@ builder.mutationField("updateFormDefinition", (t) =>
       });
       if (!form) return mutationError(null, "Form not found");
       if (form.status === "published") {
-        return mutationError(null, "Cannot edit a published form. Create a new version instead.");
+        return mutationError(
+          null,
+          "Cannot edit a published form. Create a new version instead.",
+        );
       }
 
       const data: Record<string, unknown> = {};
@@ -155,7 +159,8 @@ builder.mutationField("publishFormDefinition", (t) =>
         where: { id: args.id },
       });
       if (!form) return mutationError(null, "Form not found");
-      if (form.status === "published") return mutationError(null, "Already published");
+      if (form.status === "published")
+        return mutationError(null, "Already published");
 
       // Archive any currently published version of this slug
       await ctx.prisma.formDefinition.updateMany({
