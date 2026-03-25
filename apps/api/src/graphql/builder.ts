@@ -1,6 +1,7 @@
 import SchemaBuilder from "@pothos/core";
 import PrismaPlugin from "@pothos/plugin-prisma";
 import RelayPlugin from "@pothos/plugin-relay";
+import SimpleObjectsPlugin from "@pothos/plugin-simple-objects";
 import type PrismaTypes from "@pothos/plugin-prisma/generated";
 import { Prisma, PrismaClient } from "@prisma/client";
 import type { GraphQLContext } from "./context";
@@ -15,7 +16,7 @@ export const builder = new SchemaBuilder<{
     JSON: { Input: unknown; Output: unknown };
   };
 }>({
-  plugins: [PrismaPlugin, RelayPlugin],
+  plugins: [PrismaPlugin, RelayPlugin, SimpleObjectsPlugin],
   prisma: {
     client: prisma,
     dmmf: Prisma.dmmf,
