@@ -1,0 +1,212 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// --- Users & Auth ---
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String
+  passwordHash String?
+  isStaff      Boolean  @default(false)
+  isSuperuser  Boolean  @default(false)
+  isActive     Boolean  @default(true)
+  timezone     String   @default("UTC")
+  language     String   @default("en")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  groups          UserGroup[]
+  sessions        Session[]
+  formSubmissions FormSubmission[]
+  transitionLogs  TransitionLog[]
+  notifications   Notification[]
+  auditLogs       AuditLog[]
+}
+
+model Group {
+  id          String            @id @default(cuid())
+  name        String            @unique
+  permissions GroupPermission[]
+  users       UserGroup[]
+}
+
+model UserGroup {
+  user    User   @relation(fields: [userId], references: [id])
+  userId  String
+  group   Group  @relation(fields: [groupId], references: [id])
+  groupId String
+
+  @@id([userId, groupId])
+}
+
+model Permission {
+  id     String            @id @default(cuid())
+  slug   String            @unique
+  name   String
+  groups GroupPermission[]
+}
+
+model GroupPermission {
+  group        Group      @relation(fields: [groupId], references: [id])
+  groupId      String
+  permission   Permission @relation(fields: [permissionId], references: [id])
+  permissionId String
+
+  @@id([groupId, permissionId])
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([token])
+}
+
+// --- Forms Engine ---
+
+model FormDefinition {
+  id                 String    @id @default(cuid())
+  name               String
+  slug               String
+  description        String?
+  formType           String    @default("standard")
+  status             String    @default("draft")
+  isPublic           Boolean   @default(false)
+  version            Int       @default(1)
+  schema             Json      @default("{}")
+  fieldConfig        Json      @default("{}")
+  logicRules         Json      @default("[]")
+  scoring            Json?
+  prefill            Json?
+  notificationConfig Json?
+  publishedAt        DateTime?
+  publishedById      String?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  createdById        String?
+
+  submissions FormSubmission[]
+
+  @@unique([slug, version])
+  @@index([slug])
+  @@index([status])
+}
+
+model FormSubmission {
+  id            String   @id @default(cuid())
+  formId        String
+  form          FormDefinition @relation(fields: [formId], references: [id])
+  payload       Json
+  status        String   @default("submitted")
+  submittedById String?
+  submittedBy   User?    @relation(fields: [submittedById], references: [id])
+  submittedAt   DateTime @default(now())
+
+  @@index([formId])
+}
+
+// --- Workflow Engine ---
+
+model WorkflowDefinition {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String
+  description String?
+  modelName   String
+  states      Json     @default("[]")
+  transitions Json     @default("[]")
+  isEnabled   Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  instances WorkflowInstance[]
+
+  @@unique([slug, modelName])
+}
+
+model WorkflowInstance {
+  id           String    @id @default(cuid())
+  workflowId   String
+  workflow      WorkflowDefinition @relation(fields: [workflowId], references: [id])
+  targetModel  String
+  targetId     String
+  currentState String
+  startedAt    DateTime  @default(now())
+  completedAt  DateTime?
+  temporalId   String?
+
+  transitionLogs TransitionLog[]
+
+  @@index([targetModel, targetId])
+  @@index([workflowId, currentState])
+}
+
+model TransitionLog {
+  id               String   @id @default(cuid())
+  instanceId       String
+  instance         WorkflowInstance @relation(fields: [instanceId], references: [id], onDelete: Cascade)
+  fromState        String
+  toState          String
+  transitionedById String?
+  transitionedBy   User?    @relation(fields: [transitionedById], references: [id])
+  note             String   @default("")
+  timestamp        DateTime @default(now())
+
+  @@index([instanceId])
+}
+
+// --- Uploads ---
+
+model Upload {
+  id           String   @id @default(cuid())
+  filename     String
+  contentType  String
+  size         Int
+  s3Key        String
+  uploadedById String?
+  createdAt    DateTime @default(now())
+
+  @@index([s3Key])
+}
+
+// --- Notifications ---
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  subject   String
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId, isRead])
+}
+
+// --- Audit Log ---
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id])
+  action     String
+  targetType String?
+  targetId   String?
+  payload    Json?
+  ip         String?
+  timestamp  DateTime @default(now())
+
+  @@index([userId])
+  @@index([targetType, targetId])
+}
