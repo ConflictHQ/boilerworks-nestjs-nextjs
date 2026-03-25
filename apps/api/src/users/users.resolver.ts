@@ -31,6 +31,7 @@ builder.queryField("users", (t) =>
     type: ["User"],
     resolve: (query, _root, _args, ctx) => {
       requireAuth(ctx);
+      requirePermission(ctx, "users.view");
       return ctx.prisma.user.findMany({
         ...query,
         where: { isActive: true },
