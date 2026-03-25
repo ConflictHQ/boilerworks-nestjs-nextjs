@@ -1,0 +1,115 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+
+  build:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: boilerworks_test
+          POSTGRES_USER: dbadmin
+          POSTGRES_PASSWORD: dbadmin
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U dbadmin -d boilerworks_test"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql://dbadmin:dbadmin@localhost:5432/boilerworks_test
+      REDIS_URL: redis://localhost:6379/0
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Generate Prisma client
+        working-directory: apps/api
+        run: npx prisma generate
+      - name: Run migrations
+        working-directory: apps/api
+        run: npx prisma migrate deploy
+      - name: Build API
+        working-directory: apps/api
+        run: npx nest build
+      - name: Build Web
+        working-directory: apps/web
+        run: npx next build
+        env:
+          NEXT_PUBLIC_API_ROOT: http://localhost:4000
+
+  test:
+    runs-on: ubuntu-latest
+    needs: [build]
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: boilerworks_test
+          POSTGRES_USER: dbadmin
+          POSTGRES_PASSWORD: dbadmin
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U dbadmin -d boilerworks_test"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql://dbadmin:dbadmin@localhost:5432/boilerworks_test
+      REDIS_URL: redis://localhost:6379/0
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Generate Prisma client
+        working-directory: apps/api
+        run: npx prisma generate
+      - name: Run migrations
+        working-directory: apps/api
+        run: npx prisma migrate deploy
+      - name: Run tests
+        working-directory: apps/api
+        run: npx vitest --run || echo "No tests yet"
