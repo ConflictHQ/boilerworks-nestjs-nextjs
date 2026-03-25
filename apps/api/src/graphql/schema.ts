@@ -14,6 +14,7 @@ import "../notifications/notifications.resolver";
 import "../common/audit.resolver";
 import "../organizations/organizations.resolver";
 import "../auth/apikeys.resolver";
+import "../auth/password-reset.resolver";
 
 // Register a simple health query to verify GraphQL is working
 builder.queryField("healthCheck", (t) =>
