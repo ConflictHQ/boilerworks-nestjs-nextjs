@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import {
   ReactFlow,
   addEdge,
@@ -77,9 +77,17 @@ type WorkflowTransition = {
 
 type FormOption = { slug: string; name: string };
 
+type WorkflowBuilderInput = {
+  fromState: string;
+  toState: string;
+  label: string;
+  conditions?: unknown[];
+  actions?: unknown[];
+};
+
 type WorkflowBuilderProps = {
   states: WorkflowState[];
-  transitions: WorkflowTransition[];
+  transitions: WorkflowBuilderInput[];
   onSave: (states: WorkflowState[], transitions: WorkflowTransition[]) => void;
   availableForms?: FormOption[];
 };
@@ -409,36 +417,15 @@ export function WorkflowBuilder({
   availableForms = [],
 }: WorkflowBuilderProps) {
   const [workflowStates, setWorkflowStates] = useState<WorkflowState[]>(initialStates);
-  const [workflowTransitions, setWorkflowTransitions] =
-    useState<WorkflowTransition[]>(initialTransitions);
+  const [workflowTransitions, setWorkflowTransitions] = useState<WorkflowTransition[]>(
+    initialTransitions.map((t) => ({
+      ...t,
+      conditions: (t.conditions || []) as Condition[],
+      actions: (t.actions || []) as Action[],
+    }))
+  );
   const [selectedStateName, setSelectedStateName] = useState<string | null>(null);
   const [selectedEdgeId, setSelectedEdgeId] = useState<string | null>(null);
-
-  const buildNodes = useCallback(
-    (states: WorkflowState[], existingNodes: Node[]): Node[] => {
-      return states.map((state, i) => {
-        const existing = existingNodes.find((n) => n.id === state.name);
-        return {
-          id: state.name,
-          type: "stateNode",
-          position: existing?.position ?? { x: 250, y: i * 150 },
-          selected: state.name === selectedStateName,
-          data: {
-            ...state,
-            onSelect: () => setSelectedStateName(state.name),
-            onDelete: () => removeState(state.name),
-          },
-        };
-      });
-    },
-    [selectedStateName, removeState]
-  );
-
-  const initialNodes: Node[] = useMemo(
-    () => buildNodes(initialStates, []),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  );
 
   const initialEdges: Edge[] = useMemo(
     () =>
@@ -455,15 +442,61 @@ export function WorkflowBuilder({
     []
   );
 
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+  const [nodes, setNodes, onNodesChange] = useNodesState([] as Node[]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState([] as Edge[]);
+
+  const removeStateRef = React.useRef<(name: string) => void>(() => {});
+
+  const buildNodes = useCallback(
+    (states: WorkflowState[], existingNodes: Node[]): Node[] => {
+      return states.map((state, i) => {
+        const existing = existingNodes.find((n) => n.id === state.name);
+        return {
+          id: state.name,
+          type: "stateNode",
+          position: existing?.position ?? { x: 250, y: i * 150 },
+          selected: state.name === selectedStateName,
+          data: {
+            ...state,
+            onSelect: () => setSelectedStateName(state.name),
+            onDelete: () => removeStateRef.current(state.name),
+          },
+        };
+      });
+    },
+    [selectedStateName]
+  );
 
   const refreshNodes = useCallback(
-    (states: WorkflowState[]) => {
-      setNodes((currentNodes) => buildNodes(states, currentNodes));
+    (states: WorkflowState[]): void => {
+      setNodes((currentNodes: Node[]) => buildNodes(states, currentNodes));
     },
     [buildNodes, setNodes]
   );
+
+  // Initialize nodes and edges on mount
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useMemo(() => {
+    setNodes(buildNodes(initialStates, []));
+    setEdges(initialEdges as Edge[]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const removeState = useCallback(
+    (name: string): void => {
+      const updated = workflowStates.filter((s) => s.name !== name);
+      setWorkflowStates(updated);
+      setEdges((eds) => eds.filter((e) => e.source !== name && e.target !== name));
+      setWorkflowTransitions((prev) =>
+        prev.filter((t) => t.fromState !== name && t.toState !== name)
+      );
+      if (selectedStateName === name) setSelectedStateName(null);
+      refreshNodes(updated);
+    },
+    [workflowStates, selectedStateName, refreshNodes, setEdges]
+  );
+
+  removeStateRef.current = removeState;
 
   const onConnect = useCallback(
     (connection: Connection) => {
@@ -476,7 +509,7 @@ export function WorkflowBuilder({
         markerEnd: { type: MarkerType.ArrowClosed },
         style: { strokeWidth: 2 },
       };
-      setEdges((eds) => addEdge(newEdge, eds) as typeof eds);
+      setEdges((eds) => addEdge<Edge>(newEdge, eds));
       setWorkflowTransitions((prev) => [
         ...prev,
         {
@@ -506,20 +539,6 @@ export function WorkflowBuilder({
     setSelectedStateName(name);
     refreshNodes(updated);
   };
-
-  const removeState = useCallback(
-    (name: string) => {
-      const updated = workflowStates.filter((s) => s.name !== name);
-      setWorkflowStates(updated);
-      setEdges((eds) => eds.filter((e) => e.source !== name && e.target !== name));
-      setWorkflowTransitions((prev) =>
-        prev.filter((t) => t.fromState !== name && t.toState !== name)
-      );
-      if (selectedStateName === name) setSelectedStateName(null);
-      refreshNodes(updated);
-    },
-    [workflowStates, selectedStateName, refreshNodes, setEdges]
-  );
 
   const updateState = (name: string, updates: Partial<WorkflowState>) => {
     const updated = workflowStates.map((s) => {

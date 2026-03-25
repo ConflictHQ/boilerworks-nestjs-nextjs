@@ -441,7 +441,7 @@ function SectionHeaderWidget({ schema }: FieldWidgetProps) {
   return (
     <div className="pt-2">
       <h3 className="text-base font-semibold">{(schema.title as string) || "Section"}</h3>
-      {schema.description && (
+      {!!schema.description && (
         <p className="text-muted-foreground mt-1 text-sm">{schema.description as string}</p>
       )}
       <Separator className="mt-2" />
@@ -546,7 +546,7 @@ export function DynamicField(props: FieldWidgetProps) {
       <Label htmlFor={name}>{title}</Label>
       {rendered}
       {error && <p className="text-sm text-red-500">{error.message as string}</p>}
-      {schema.description && !isDisplay && (
+      {!!schema.description && !isDisplay && (
         <p className="text-muted-foreground text-xs">{schema.description as string}</p>
       )}
     </div>

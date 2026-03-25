@@ -55,7 +55,7 @@ export default function UsersPage() {
 
   const handleDeactivate = async (id: string, name: string) => {
     const { data: result } = await deleteUser({ variables: { id } });
-    if (result?.deleteUser?.ok) {
+    if ((result as Record<string, unknown> | undefined)?.deleteUser) {
       toast.success(`Deactivated ${name}`);
       refetch();
     } else {

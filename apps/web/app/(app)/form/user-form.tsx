@@ -32,7 +32,7 @@ export const UserForm = () => {
     formState: { errors, isSubmitting },
     reset,
   } = useForm<UserFormValues>({
-    resolver: zodResolver(userFormSchema),
+    resolver: zodResolver(userFormSchema as never),
     defaultValues: {
       username: "",
       email: "",

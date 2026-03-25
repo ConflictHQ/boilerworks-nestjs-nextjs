@@ -124,17 +124,24 @@ export function DynamicForm({ slug, onSuccess }: DynamicFormProps) {
       variables: { slug, payload },
     });
 
-    if (result?.submitForm.ok) {
+    const submitResult = result?.submitForm as
+      | {
+          ok: boolean;
+          errors: { field: string | null; message: string }[] | null;
+          submissionId?: string;
+        }
+      | undefined;
+    if (submitResult?.ok) {
       setSubmitted(true);
       toast.success("Form submitted", { description: formDef.name });
-      if (result.submitForm.submissionId && onSuccess) {
-        onSuccess(result.submitForm.submissionId);
+      if (submitResult.submissionId && onSuccess) {
+        onSuccess(submitResult.submissionId);
       }
-    } else if (result?.submitForm.errors) {
-      for (const err of result.submitForm.errors) {
+    } else if (submitResult?.errors) {
+      for (const err of submitResult.errors) {
         setError(err.field || "root", {
           type: "server",
-          message: err.messages.join(", "),
+          message: err.message,
         });
       }
       toast.error("Validation failed", { description: "Please fix the errors below." });

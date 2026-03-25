@@ -30,7 +30,7 @@ export default function WorkflowsPage() {
       toast.success("Workflow deleted", { description: `${wf.name} has been removed.` });
     } else {
       for (const e of data?.deleteWorkflowDefinition?.errors ?? []) {
-        toast.error(`${e.field}: ${e.messages.join(", ")}`);
+        toast.error(`${e.field}: ${e.message}`);
       }
     }
   };
@@ -80,16 +80,14 @@ export default function WorkflowsPage() {
                 <Badge variant={wf.isEnabled ? "default" : "secondary"}>
                   {wf.isEnabled ? "Active" : "Disabled"}
                 </Badge>
-                <span className="text-muted-foreground text-xs">{wf.modelLabel}</span>
+                <span className="text-muted-foreground text-xs">{wf.modelName}</span>
               </div>
               <span className="text-muted-foreground text-sm">
                 {wf.description || "No description"}
               </span>
             </div>
             <div className="flex items-center gap-4">
-              <div className="text-muted-foreground text-sm">
-                {wf.activeInstanceCount} active / {wf.instanceCount} total
-              </div>
+              <div className="text-muted-foreground text-sm">{wf.instanceCount} total</div>
               <Button variant="outline" size="sm" asChild>
                 <Link href={`/workflows/${wf.slug}/builder`}>
                   <WrenchIcon className="mr-1 h-3 w-3" /> Builder

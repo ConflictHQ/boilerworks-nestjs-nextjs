@@ -94,7 +94,7 @@ export default function NewFormPage() {
       router.push(`/forms/${data.slug}`);
     } else {
       for (const e of result?.createFormDefinition?.errors ?? []) {
-        toast.error(`${e.field}: ${e.messages.join(", ")}`);
+        toast.error(`${e.field}: ${e.message}`);
       }
     }
   };
@@ -102,7 +102,7 @@ export default function NewFormPage() {
   return (
     <div className="flex flex-1 overflow-hidden">
       {/* Full-height resizable split */}
-      <PanelGroup direction="horizontal" className="flex-1">
+      <PanelGroup className="flex-1">
         <Panel defaultSize={showPreview ? 65 : 100} minSize={40}>
           {/* LEFT PANE: scrollable form + builder */}
           <form
