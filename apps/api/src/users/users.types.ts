@@ -1,8 +1,8 @@
 import { builder } from "../graphql/builder";
 
-builder.prismaObject("User", {
+builder.prismaNode("User", {
+  id: { field: "id" },
   fields: (t) => ({
-    id: t.exposeID("id"),
     email: t.exposeString("email"),
     name: t.exposeString("name"),
     isStaff: t.exposeBoolean("isStaff"),

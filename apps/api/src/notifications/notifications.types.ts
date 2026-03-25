@@ -1,8 +1,8 @@
 import { builder } from "../graphql/builder";
 
-builder.prismaObject("Notification", {
+builder.prismaNode("Notification", {
+  id: { field: "id" },
   fields: (t) => ({
-    id: t.exposeID("id"),
     subject: t.exposeString("subject"),
     message: t.exposeString("message"),
     isRead: t.exposeBoolean("isRead"),

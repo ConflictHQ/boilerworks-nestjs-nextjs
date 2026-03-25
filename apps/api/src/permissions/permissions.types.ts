@@ -1,16 +1,16 @@
 import { builder } from "../graphql/builder";
 
-builder.prismaObject("Permission", {
+builder.prismaNode("Permission", {
+  id: { field: "id" },
   fields: (t) => ({
-    id: t.exposeID("id"),
     slug: t.exposeString("slug"),
     name: t.exposeString("name"),
   }),
 });
 
-builder.prismaObject("Group", {
+builder.prismaNode("Group", {
+  id: { field: "id" },
   fields: (t) => ({
-    id: t.exposeID("id"),
     name: t.exposeString("name"),
     permissions: t.relation("permissions"),
     users: t.relation("users"),
