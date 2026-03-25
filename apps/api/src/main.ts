@@ -3,6 +3,8 @@ import * as cookieParser from "cookie-parser";
 import helmet from "helmet";
 import { AppModule } from "./app.module";
 import { AllExceptionsFilter } from "./common/filters/all-exceptions.filter";
+import { LoggingInterceptor } from "./common/interceptors/logging.interceptor";
+import { TimeoutInterceptor } from "./common/interceptors/timeout.interceptor";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -21,8 +23,9 @@ async function bootstrap() {
     credentials: true,
   });
 
-  // Global exception filter
+  // Global filters + interceptors
   app.useGlobalFilters(new AllExceptionsFilter());
+  app.useGlobalInterceptors(new LoggingInterceptor(), new TimeoutInterceptor());
 
   const port = process.env.PORT ?? 4000;
   await app.listen(port);
