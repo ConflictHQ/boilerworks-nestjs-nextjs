@@ -26,12 +26,14 @@ model User {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  groups          UserGroup[]
-  sessions        Session[]
-  formSubmissions FormSubmission[]
-  transitionLogs  TransitionLog[]
-  notifications   Notification[]
-  auditLogs       AuditLog[]
+  groups              UserGroup[]
+  sessions            Session[]
+  formSubmissions     FormSubmission[]
+  transitionLogs      TransitionLog[]
+  notifications       Notification[]
+  auditLogs           AuditLog[]
+  organizationMembers OrganizationMember[]
+  apiKeys             ApiKey[]
 }
 
 model Group {
@@ -213,4 +215,47 @@ model AuditLog {
 
   @@index([userId])
   @@index([targetType, targetId])
+}
+
+// --- Organizations ---
+
+model Organization {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  settings  Json     @default("{}")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  members OrganizationMember[]
+}
+
+model OrganizationMember {
+  id             String       @id @default(cuid())
+  userId         String
+  user           User         @relation(fields: [userId], references: [id])
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  role           String       @default("member") // owner, admin, member
+  joinedAt       DateTime     @default(now())
+
+  @@unique([userId, organizationId])
+}
+
+// --- API Keys ---
+
+model ApiKey {
+  id          String    @id @default(cuid())
+  name        String
+  keyHash     String    @unique
+  keyPrefix   String    // first 8 chars for identification
+  permissions Json      @default("[]")
+  createdById String
+  createdBy   User      @relation(fields: [createdById], references: [id])
+  lastUsedAt  DateTime?
+  expiresAt   DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@index([keyHash])
 }
