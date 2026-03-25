@@ -19,6 +19,8 @@ import "../auth/password-reset.resolver";
 import "../auth/email-verification.resolver";
 import "../auth/invitation.resolver";
 import "../rules/rules.types";
+import "../search/search.resolver";
+import "./subscriptions";
 
 // Register a simple health query to verify GraphQL is working
 builder.queryField("healthCheck", (t) =>
