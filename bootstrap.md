@@ -338,10 +338,23 @@ await requirePermission(PermissionSlug.InvoiceView);
 
 ### Auth
 
-Session-based. httpOnly cookies. No JWT for auth state.
+Auth0 for identity + backend session for API auth. httpOnly cookies. No JWT stored client-side.
+
+**Login flow:**
+1. Frontend redirects to Auth0 universal login
+2. Auth0 callback hits backend with authorization code
+3. Backend exchanges code for Auth0 tokens (id_token + access_token)
+4. Backend creates local Session, sets httpOnly cookie with backend JWT
+5. Frontend uses cookie for all subsequent GraphQL requests
 
 ```typescript
 // auth/auth.service.ts
+async handleCallback(code: string): Promise<Session> {
+  const auth0Tokens = await this.exchangeCode(code);
+  const user = await this.findOrCreateUser(auth0Tokens);
+  return this.createSession(user.id);
+}
+
 async createSession(userId: string): Promise<Session> {
   const token = randomBytes(32).toString("hex");
   return this.prisma.session.create({
@@ -359,14 +372,21 @@ async validateSession(token: string): Promise<User | null> {
 }
 ```
 
+**Auth0 env vars** (shared with Django edition — same Auth0 tenant):
+```
+AUTH0_DOMAIN=conflict.us.auth0.com
+AUTH0_CLIENT_ID=...
+AUTH0_CLIENT_SECRET=...
+AUTH0_CLIENT_SCOPES="openid profile email read:users create:users update:users"
+AUTH0_DATABASE_CONNECTION_ID="Username-Password-Authentication"
+```
+
 **Frontend auth gate** (`app/(app)/layout.tsx`):
 ```typescript
 // Server Component — checks for session cookie
 // If no cookie → redirect to /auth/login
 // If cookie → fetch user via GraphQL → render children
 ```
-
-**Login flow:** Frontend → Backend login endpoint → SSO/password → Create session → Set cookie → Redirect to callback → Store token → Redirect to app
 
 ---
 
@@ -600,6 +620,75 @@ npm run test          # Run tests
 
 ---
 
+### Dataloaders
+
+Prevent N+1 queries in GraphQL resolvers. One dataloader per batched relation:
+
+```typescript
+// graphql/dataloaders.ts
+import DataLoader from "dataloader";
+
+export const createDataloaders = (prisma: PrismaClient) => ({
+  userById: new DataLoader<string, User | null>(async (ids) => {
+    const users = await prisma.user.findMany({ where: { id: { in: [...ids] } } });
+    const map = new Map(users.map((u) => [u.id, u]));
+    return ids.map((id) => map.get(id) ?? null);
+  }),
+});
+```
+
+**Rules:**
+- Create in `graphql/dataloaders.ts`, attach to context per-request
+- Key by ID (string), return in same order as input
+- Never share dataloaders across requests — they cache per-request only
+
+---
+
+### Environment Variables
+
+All env vars validated at startup via Zod (`config/env.ts`). App fails fast on missing config.
+
+**Naming convention:**
+- `DATABASE_URL` — Postgres connection string
+- `REDIS_URL` — Redis connection string
+- `S3_*` — MinIO/S3 config (ENDPOINT, BUCKET, ACCESS_KEY, SECRET_KEY)
+- `SMTP_*` — Email config (HOST, PORT, FROM)
+- `FEATURE_*` — Feature flags (boolean)
+- `SESSION_SECRET` — Session signing secret (min 32 chars)
+- `CORS_ORIGINS` — Comma-separated allowed origins
+- `NODE_ENV` — development | production | test
+
+**Files:**
+- `.env.example` — documented template (committed)
+- `.env` — local overrides (gitignored)
+- `.env.test` — test database URL (gitignored)
+
+---
+
+### Security
+
+- **CORS:** Configured in `main.ts`, allowed origins from `CORS_ORIGINS` env var
+- **Helmet:** HTTP security headers (X-Frame-Options, X-Content-Type-Options, etc.)
+- **Cookies:** httpOnly, secure (prod), sameSite: lax
+- **Rate limiting:** Per-endpoint, configurable via decorator
+- **Input validation:** Zod at API boundaries, Ajv for JSON Schema forms
+- **No raw SQL:** Always use Prisma query builder
+
+---
+
+### Branching
+
+```
+main          — stable, always deployable
+feature/...   — new features
+fix/...       — bug fixes
+chore/...     — tooling, deps, docs
+```
+
+Open PRs against `main`. Keep PRs focused — one feature or fix per PR.
+
+---
+
 ## Ports (local)
 
 | Service | URL |
@@ -632,10 +721,21 @@ npx prisma studio             # Visual database browser
 npx prisma generate           # Regenerate Prisma client
 npm run db:seed               # Load dev fixtures
 
-# Docker
+# Docker (or use ./run.sh)
 docker compose -f docker/docker-compose.yaml up -d        # Start infra
 docker compose -f docker/docker-compose.yaml down          # Stop
 docker compose -f docker/docker-compose.yaml logs api -f   # Tail API logs
+
+# run.sh (preferred — local dev command center)
+./run.sh up           # Start everything
+./run.sh stop         # Stop everything
+./run.sh logs         # Tail API logs
+./run.sh migrate      # Run Prisma migrations
+./run.sh seed         # Load dev fixtures
+./run.sh test         # Run test suite
+./run.sh lint         # Run linters
+./run.sh health       # Check service health
+./run.sh help         # See all commands
 ```
 
 ---
