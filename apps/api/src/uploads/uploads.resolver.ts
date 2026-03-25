@@ -92,6 +92,12 @@ builder.mutationField("confirmUpload", (t) =>
     resolve: async (_root, args, ctx) => {
       requireAuth(ctx);
 
+      // Verify the upload belongs to the current user
+      const upload = await ctx.prisma.upload.findUnique({ where: { id: args.id } });
+      if (!upload || (upload.uploadedById && upload.uploadedById !== ctx.user!.id && !ctx.user!.isSuperuser)) {
+        return mutationError(null, "Upload not found or access denied");
+      }
+
       await ctx.prisma.upload.update({
         where: { id: args.id },
         data: { size: args.size },

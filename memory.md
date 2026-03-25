@@ -21,7 +21,7 @@ Full-stack TypeScript boilerplate for building SaaS products. NestJS backend + N
 | `cuid()` IDs on all models | Never expose sequential integer IDs; cuid is URL-safe and collision-resistant |
 | Soft deletes via `deletedAt` | Compliance + audit requirement; never hard-delete business objects |
 | Group-based RBAC, never direct user permissions | Simpler mental model; permission changes propagate via group membership |
-| BullMQ + Redis for async jobs | NestJS-native, proven at scale; replaces Celery from the Django edition |
+| BullMQ + Redis for async jobs | NestJS-native, proven at scale; BullMQ is in deps but processors not yet implemented — actions run synchronously |
 | Prisma ORM (not TypeORM, Drizzle) | Best type-safety story, excellent migration tooling, Pothos plugin |
 | Monorepo with Turborepo | Shared types between API and frontend; single CI pipeline; independent builds |
 | `bootstrap.md` as primary conventions doc | Single source of truth for all agents and humans; agent shims point here |
@@ -38,7 +38,9 @@ Full-stack TypeScript boilerplate for building SaaS products. NestJS backend + N
 - **Never use `getClient()` in Client Components** — use hooks from `graphql/<domain>/`.
 - **Run `npm run lint` before committing** — Husky pre-commit hooks enforce this.
 - **Prisma client must be regenerated** after schema changes: `npx prisma generate`.
-- **Logic engine lives in `packages/shared/`** — both frontend and backend consume it; changes affect both.
+- **Logic engine lives in frontend** at `components/forms/logic-engine.ts` — backend uses Ajv for JSON Schema validation. Both sides need to agree on field types.
+- **Feature flags gate module registration** — setting `FEATURE_FORMS=false` removes forms from the GraphQL schema entirely.
+- **Organization mutations check membership** — must be admin/owner of the org to add/remove members.
 
 ---
 
@@ -50,9 +52,9 @@ Full-stack TypeScript boilerplate for building SaaS products. NestJS backend + N
 │                                                     │
 │  api (NestJS) ──► postgres                          │
 │     │                                               │
-│     └──► redis ──► worker (BullMQ)                  │
+│     └──► redis                                      │
 │                                                     │
-│  web (Next.js)   minio   mailpit                    │
+│  web (Next.js)  studio  minio  mailpit  opensearch  │
 └─────────────────────────────────────────────────────┘
 ```
 
@@ -66,7 +68,7 @@ All infrastructure runs in Docker. Node.js is required on the host for developme
 User → (many) UserGroup → Group → (many) GroupPermission → Permission
 ```
 
-Permissions are defined in `packages/shared` as the `P` enum. Check via `requirePermission(ctx, P.INVOICE_VIEW)`. Superusers bypass all checks. Assign via admin UI (Group management).
+Check via `requirePermission(ctx, "users.view")`. Superusers bypass all checks. 23 permission slugs seeded. Debug via `permissionDiagnose(userId, action)` query. Assign via Prisma Studio or GraphQL mutations.
 
 ---
 
@@ -75,8 +77,8 @@ Permissions are defined in `packages/shared` as the `P` enum. Check via `require
 - Next.js App Router with RSC + client components
 - Apollo Client for GraphQL; UNAUTHENTICATED errors redirect to login
 - Dark mode via `next-themes`
-- i18n planned via `next-intl`
-- Auth is NestJS session via httpOnly cookie — no Auth0 or external IdP by default
+- i18n via `next-intl` (7 languages: en, de, es, fr, it, pl, pt)
+- Auth via Auth0 SSO + password fallback; session stored in httpOnly cookie `backend_jwt`
 
 ---
 

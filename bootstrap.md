@@ -10,23 +10,32 @@ An agent given this document and a business requirement should be able to genera
 
 | Layer | What's there |
 |---|---|
-| Auth | Session-based auth (httpOnly cookies), login/logout, rate limiting on auth endpoints |
-| Data | Postgres 16, Prisma ORM, `cuid()` IDs, `createdAt`/`updatedAt` on all models, soft deletes via `deletedAt` |
-| API | GraphQL (Pothos + Prisma plugin + Relay plugin), GraphQL Yoga server |
-| Permissions | Group-based RBAC (User → UserGroup → Group → GroupPermission → Permission), guard decorator |
-| Async | BullMQ workers, Redis broker, Bull Board monitoring |
-| Search | MeiliSearch or Typesense (planned) |
-| Email | Nodemailer (prod), Mailpit (local) |
-| Feature flags | Env-based feature toggles (`config/features.ts`) |
-| Admin | AdminJS or Prisma Studio for CRUD |
-| Forms engine | FormDefinition (versioned JSON Schema), FormSubmission, 21+ field types, logic engine |
+| Auth | Auth0 SSO + password fallback, session-based (httpOnly cookies), login/logout/callback |
+| Auth flows | Password reset, email verification, user invitation (all with email delivery) |
+| Data | Postgres 16, Prisma ORM, `cuid()` IDs, `createdAt`/`updatedAt` on all models, soft deletes via Prisma Extensions |
+| API | GraphQL (Pothos + Prisma plugin + Relay plugin + SimpleObjects), GraphQL Yoga server |
+| Permissions | Group-based RBAC (User → UserGroup → Group → GroupPermission → Permission), `requireAuth` + `requirePermission` guards |
+| Permissions debug | `permissionDiagnose(userId, action)` trace + `effectivePermissions(userId)` query |
+| Organizations | Multi-tenancy: Organization + OrganizationMember with roles (owner/admin/member) |
+| API keys | Service account tokens (`bw_live_...`), hashed storage, scoped permissions |
+| Search | OpenSearch (feature-gated via `FEATURE_SEARCH`, Prisma fallback when disabled) |
+| Email | Nodemailer with templates (password reset, invitation, form notification), Mailpit for local |
+| Feature flags | Env-based toggles (`config/features.ts`) — gates module registration + resolver execution |
+| Admin | Prisma Studio at :5555 (Docker Compose service) |
+| Forms engine | FormDefinition (versioned JSON Schema), FormSubmission, field types, logic engine, public form submissions, analytics |
 | Workflow engine | WorkflowDefinition (JSON state machine), WorkflowInstance, TransitionLog, conditions + actions |
-| Uploads | S3/MinIO presigned URLs, Upload model |
-| Notifications | In-app notifications, email delivery |
-| Audit | AuditLog model for mutation tracking |
-| Infra | Docker Compose: postgres, redis, minio, mailpit, api, web, worker |
-| Frontend | Next.js 16 (App Router), Apollo Client, shadcn/ui, Tailwind CSS, Recharts, i18n, dark mode |
-| CI | GitHub Actions: lint + test (planned) |
+| Rule engine | Condition evaluator (8 operators), AND logic, model/trigger filtering |
+| Uploads | S3/MinIO presigned URLs, Upload model, ownership verification |
+| Notifications | In-app notifications (CRUD, unread count, mark read), email delivery |
+| Webhooks | HMAC-signed outgoing webhook delivery service |
+| CSV | Import/export service with proper quoting/escaping |
+| Audit | AuditLog model + query with filters (userId, action, targetType) |
+| Infra | Docker Compose: postgres, redis, minio, mailpit, opensearch, prisma-studio, api, web |
+| Frontend | Next.js 16 (App Router), Apollo Client, shadcn/ui, Tailwind CSS, Recharts, i18n (7 langs), dark mode |
+| Frontend pages | Dashboard, forms (list + builder), workflows (list + builder), users, notifications, audit log, settings, organizations, playground |
+| CI | GitHub Actions: lint + build + test (with Postgres + Redis services) |
+| DX | `run.sh` command center, scaffold command, GraphQL schema export |
+| Security | Helmet, CORS, global exception filter, Auth0 CSRF protection, cookie hardening |
 
 ---
 
@@ -150,13 +159,20 @@ model Invoice {
 - Use `@@unique` for natural keys (e.g., `[slug, version]`)
 - Relations always specify `onDelete` behavior
 
-**Soft deletes:** Use Prisma middleware to filter `deletedAt IS NULL` globally:
+**Soft deletes:** Implemented via Prisma Extension (`prisma/extensions/soft-delete.ts`). Auto-filters `deletedAt IS NULL` on `findMany`/`findFirst` for soft-delete models (FormDefinition, WorkflowDefinition, Upload, Organization):
 ```typescript
-prisma.$use(async (params, next) => {
-  if (params.action === "findMany" || params.action === "findFirst") {
-    params.args.where = { ...params.args.where, deletedAt: null };
-  }
-  return next(params);
+export const softDeleteExtension = Prisma.defineExtension({
+  name: "soft-delete",
+  query: {
+    $allModels: {
+      async findMany({ model, args, query }) {
+        if (SOFT_DELETE_MODELS.includes(model)) {
+          args.where = { ...args.where, deletedAt: null };
+        }
+        return query(args);
+      },
+    },
+  },
 });
 ```
 
@@ -243,12 +259,14 @@ builder.mutationField("createInvoice", (t) =>
 **Context** (`graphql/context.ts`):
 ```typescript
 export type GraphQLContext = {
-  user: User | null;
-  session: Session | null;
+  user: (User & { groups: Array<{ group: { permissions: Array<{ permission: { slug: string } }> } }> }) | null;
+  permissions: Set<string>;  // Effective permissions (resolved from groups, "*" for superusers)
   prisma: PrismaClient;
   req: Request;
 };
 ```
+
+Context is created per-request. Session token is read from the `backend_jwt` cookie or `Authorization: Bearer` header. User + permissions are loaded eagerly.
 
 **Auth check at the top of every resolver and mutation.** No exceptions:
 ```typescript
@@ -390,51 +408,23 @@ AUTH0_DATABASE_CONNECTION_ID="Username-Password-Authentication"
 
 ---
 
-### BullMQ Jobs
+### Async Jobs (planned)
 
-Tasks live in `jobs/` directory. One processor per queue:
+BullMQ is in `package.json` but job processors are not yet implemented. Workflow actions and email sending currently run synchronously in resolvers.
 
+When implementing BullMQ processors, follow this pattern:
 ```typescript
+// jobs/workflow-action.processor.ts
 @Processor("workflow-actions")
 export class WorkflowActionProcessor {
-  constructor(
-    private prisma: PrismaService,
-    private email: EmailService,
-  ) {}
-
   @Process("execute")
   async handleAction(job: Job<WorkflowActionData>) {
-    const { action, instanceId, fromState, toState, userId } = job.data;
-
-    switch (action.type) {
-      case "notify_user":
-        await this.createNotification(action);
-        break;
-      case "send_email":
-        await this.email.send(action.to, action.subject, action.message);
-        break;
-      case "call_webhook":
-        await fetch(action.url, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ instanceId, fromState, toState, userId }),
-        });
-        break;
-      case "update_field":
-        // Polymorphic field update
-        break;
-    }
+    // Process the action
   }
 }
 ```
 
-**Retryable jobs:**
-```typescript
-await this.queue.add("execute", payload, {
-  attempts: 3,
-  backoff: { type: "exponential", delay: 5000 },
-});
-```
+Register the processor in `app.module.ts` and configure Bull Board at `/admin/queues` for monitoring.
 
 ---
 
@@ -620,27 +610,25 @@ npm run test          # Run tests
 
 ---
 
-### Dataloaders
+### Feature Flags
 
-Prevent N+1 queries in GraphQL resolvers. One dataloader per batched relation:
+Env-based toggles that gate module registration and resolver execution:
 
 ```typescript
-// graphql/dataloaders.ts
-import DataLoader from "dataloader";
+// config/features.ts
+export const features = {
+  forms: envBool("FEATURE_FORMS", true),
+  workflows: envBool("FEATURE_WORKFLOWS", true),
+  search: envBool("FEATURE_SEARCH", false),
+  temporal: envBool("FEATURE_TEMPORAL", false),
+};
 
-export const createDataloaders = (prisma: PrismaClient) => ({
-  userById: new DataLoader<string, User | null>(async (ids) => {
-    const users = await prisma.user.findMany({ where: { id: { in: [...ids] } } });
-    const map = new Map(users.map((u) => [u.id, u]));
-    return ids.map((id) => map.get(id) ?? null);
-  }),
-});
+// In a resolver — throws FEATURE_DISABLED if flag is off
+import { requireFeature } from "../config/features";
+requireFeature("forms");
 ```
 
-**Rules:**
-- Create in `graphql/dataloaders.ts`, attach to context per-request
-- Key by ID (string), return in same order as input
-- Never share dataloaders across requests — they cache per-request only
+Setting `FEATURE_FORMS=false` removes forms types and resolvers from the GraphQL schema entirely. The `features` GraphQL query returns all flag states to the frontend.
 
 ---
 

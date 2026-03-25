@@ -73,6 +73,19 @@ builder.mutationField("addOrganizationMember", (t) =>
     resolve: async (_root, args, ctx) => {
       requireAuth(ctx);
 
+      // Verify caller is admin/owner of this organization
+      const callerMembership = await ctx.prisma.organizationMember.findUnique({
+        where: {
+          userId_organizationId: {
+            userId: ctx.user!.id,
+            organizationId: args.organizationId,
+          },
+        },
+      });
+      if (!ctx.user!.isSuperuser && (!callerMembership || !["owner", "admin"].includes(callerMembership.role))) {
+        return mutationError(null, "Only organization admins or owners can add members");
+      }
+
       try {
         await ctx.prisma.organizationMember.create({
           data: {
@@ -98,6 +111,19 @@ builder.mutationField("removeOrganizationMember", (t) =>
     },
     resolve: async (_root, args, ctx) => {
       requireAuth(ctx);
+
+      // Verify caller is admin/owner of this organization
+      const callerMembership = await ctx.prisma.organizationMember.findUnique({
+        where: {
+          userId_organizationId: {
+            userId: ctx.user!.id,
+            organizationId: args.organizationId,
+          },
+        },
+      });
+      if (!ctx.user!.isSuperuser && (!callerMembership || !["owner", "admin"].includes(callerMembership.role))) {
+        return mutationError(null, "Only organization admins or owners can remove members");
+      }
 
       await ctx.prisma.organizationMember.deleteMany({
         where: {
