@@ -48,7 +48,7 @@ export default function WorkflowBuilderPage() {
       const errors = data?.updateWorkflowDefinition?.errors ?? [];
       if (errors.length > 0) {
         for (const e of errors) {
-          toast.error(`${e.field}: ${e.messages.join(", ")}`);
+          toast.error(`${e.field}: ${e.message}`);
         }
       } else {
         toast.error("Failed to save workflow");

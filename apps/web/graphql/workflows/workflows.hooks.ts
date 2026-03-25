@@ -18,9 +18,9 @@ import type {
   WorkflowDefinitionsData,
 } from "./workflows.types";
 
-export const useWorkflows = (modelLabel?: string) => {
+export const useWorkflows = (modelName?: string) => {
   const { data, loading, error, refetch } = useQuery<WorkflowDefinitionsData>(GET_WORKFLOWS, {
-    variables: { modelLabel },
+    variables: { modelName },
     fetchPolicy: "cache-and-network",
   });
   return { workflows: data?.workflowDefinitions ?? [], loading, error, refetch };

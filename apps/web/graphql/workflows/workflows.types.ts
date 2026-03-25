@@ -24,7 +24,6 @@ export type WorkflowDefinition = {
   isEnabled: boolean;
   createdAt: string;
   instanceCount: number;
-  activeInstanceCount: number;
 };
 
 export type WorkflowDefinitionsData = {
@@ -36,8 +35,8 @@ export type WorkflowDefinitionData = {
 };
 
 export type MutationError = {
-  field: string;
-  messages: string[];
+  field: string | null;
+  message: string;
 };
 
 export type WorkflowMutationResult = {
