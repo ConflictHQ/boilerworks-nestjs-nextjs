@@ -24,7 +24,8 @@ builder.mutationField("sendVerificationEmail", (t) =>
         },
       });
 
-      const frontendUrl = process.env.CORS_ORIGINS?.split(",")[0] || "http://localhost:3000";
+      const frontendUrl =
+        process.env.CORS_ORIGINS?.split(",")[0] || "http://localhost:3000";
       const verifyUrl = `${frontendUrl}/auth/verify-email?token=${rawToken}`;
 
       await emailService.send({

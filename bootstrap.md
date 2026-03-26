@@ -8,34 +8,34 @@ An agent given this document and a business requirement should be able to genera
 
 ## What's Already Built
 
-| Layer | What's there |
-|---|---|
-| Auth | Auth0 SSO + password fallback, session-based (httpOnly cookies), login/logout/callback |
-| Auth flows | Password reset, email verification, user invitation (all with email delivery) |
-| Data | Postgres 16, Prisma ORM, `cuid()` IDs, `createdAt`/`updatedAt` on all models, soft deletes via Prisma Extensions |
-| API | GraphQL (Pothos + Prisma plugin + Relay plugin + SimpleObjects), GraphQL Yoga server |
-| Permissions | Group-based RBAC (User → UserGroup → Group → GroupPermission → Permission), `requireAuth` + `requirePermission` guards |
-| Permissions debug | `permissionDiagnose(userId, action)` trace + `effectivePermissions(userId)` query |
-| Organizations | Multi-tenancy: Organization + OrganizationMember with roles (owner/admin/member) |
-| API keys | Service account tokens (`bw_live_...`), hashed storage, scoped permissions |
-| Search | OpenSearch (feature-gated via `FEATURE_SEARCH`, Prisma fallback when disabled) |
-| Email | Nodemailer with templates (password reset, invitation, form notification), Mailpit for local |
-| Feature flags | Env-based toggles (`config/features.ts`) — gates module registration + resolver execution |
-| Admin | Prisma Studio at :5555 (Docker Compose service) |
-| Forms engine | FormDefinition (versioned JSON Schema), FormSubmission, field types, logic engine, public form submissions, analytics |
-| Workflow engine | WorkflowDefinition (JSON state machine), WorkflowInstance, TransitionLog, conditions + actions |
-| Rule engine | Condition evaluator (8 operators), AND logic, model/trigger filtering |
-| Uploads | S3/MinIO presigned URLs, Upload model, ownership verification |
-| Notifications | In-app notifications (CRUD, unread count, mark read), email delivery |
-| Webhooks | HMAC-signed outgoing webhook delivery service |
-| CSV | Import/export service with proper quoting/escaping |
-| Audit | AuditLog model + query with filters (userId, action, targetType) |
-| Infra | Docker Compose: postgres, redis, minio, mailpit, opensearch, prisma-studio, api, web |
-| Frontend | Next.js 16 (App Router), Apollo Client, shadcn/ui, Tailwind CSS, Recharts, i18n (7 langs), dark mode |
-| Frontend pages | Dashboard, forms (list + builder), workflows (list + builder), users, notifications, audit log, settings, organizations, playground |
-| CI | GitHub Actions: lint + build + test (with Postgres + Redis services) |
-| DX | `run.sh` command center, scaffold command, GraphQL schema export |
-| Security | Helmet, CORS, global exception filter, Auth0 CSRF protection, cookie hardening |
+| Layer             | What's there                                                                                                                        |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Auth              | Auth0 SSO + password fallback, session-based (httpOnly cookies), login/logout/callback                                              |
+| Auth flows        | Password reset, email verification, user invitation (all with email delivery)                                                       |
+| Data              | Postgres 16, Prisma ORM, `cuid()` IDs, `createdAt`/`updatedAt` on all models, soft deletes via Prisma Extensions                    |
+| API               | GraphQL (Pothos + Prisma plugin + Relay plugin + SimpleObjects), GraphQL Yoga server                                                |
+| Permissions       | Group-based RBAC (User → UserGroup → Group → GroupPermission → Permission), `requireAuth` + `requirePermission` guards              |
+| Permissions debug | `permissionDiagnose(userId, action)` trace + `effectivePermissions(userId)` query                                                   |
+| Organizations     | Multi-tenancy: Organization + OrganizationMember with roles (owner/admin/member)                                                    |
+| API keys          | Service account tokens (`bw_live_...`), hashed storage, scoped permissions                                                          |
+| Search            | OpenSearch (feature-gated via `FEATURE_SEARCH`, Prisma fallback when disabled)                                                      |
+| Email             | Nodemailer with templates (password reset, invitation, form notification), Mailpit for local                                        |
+| Feature flags     | Env-based toggles (`config/features.ts`) — gates module registration + resolver execution                                           |
+| Admin             | Prisma Studio at :5555 (Docker Compose service)                                                                                     |
+| Forms engine      | FormDefinition (versioned JSON Schema), FormSubmission, field types, logic engine, public form submissions, analytics               |
+| Workflow engine   | WorkflowDefinition (JSON state machine), WorkflowInstance, TransitionLog, conditions + actions                                      |
+| Rule engine       | Condition evaluator (8 operators), AND logic, model/trigger filtering                                                               |
+| Uploads           | S3/MinIO presigned URLs, Upload model, ownership verification                                                                       |
+| Notifications     | In-app notifications (CRUD, unread count, mark read), email delivery                                                                |
+| Webhooks          | HMAC-signed outgoing webhook delivery service                                                                                       |
+| CSV               | Import/export service with proper quoting/escaping                                                                                  |
+| Audit             | AuditLog model + query with filters (userId, action, targetType)                                                                    |
+| Infra             | Docker Compose: postgres, redis, minio, mailpit, opensearch, prisma-studio, api, web                                                |
+| Frontend          | Next.js 16 (App Router), Apollo Client, shadcn/ui, Tailwind CSS, Recharts, i18n (7 langs), dark mode                                |
+| Frontend pages    | Dashboard, forms (list + builder), workflows (list + builder), users, notifications, audit log, settings, organizations, playground |
+| CI                | GitHub Actions: lint + build + test (with Postgres + Redis services)                                                                |
+| DX                | `run.sh` command center, scaffold command, GraphQL schema export                                                                    |
+| Security          | Helmet, CORS, global exception filter, Auth0 CSRF protection, cookie hardening                                                      |
 
 ---
 
@@ -101,6 +101,7 @@ apps/api/src/invoices/
 ```
 
 Register the module in `app.module.ts`:
+
 ```typescript
 @Module({
   imports: [..., InvoicesModule],
@@ -109,8 +110,9 @@ export class AppModule {}
 ```
 
 Register types in `graphql/schema.ts`:
+
 ```typescript
-import "./invoices/invoices.types";  // side-effect import registers types
+import "./invoices/invoices.types"; // side-effect import registers types
 ```
 
 ### Frontend structure (per domain)
@@ -153,6 +155,7 @@ model Invoice {
 ```
 
 **Rules:**
+
 - Every model has `id`, `createdAt`, `updatedAt`
 - Business models add `deletedAt` for soft deletes — never call `prisma.model.delete()`
 - Use `@@index` for any field used in filters or joins
@@ -160,6 +163,7 @@ model Invoice {
 - Relations always specify `onDelete` behavior
 
 **Soft deletes:** Implemented via Prisma Extension (`prisma/extensions/soft-delete.ts`). Auto-filters `deletedAt IS NULL` on `findMany`/`findFirst` for soft-delete models (FormDefinition, WorkflowDefinition, Upload, Organization):
+
 ```typescript
 export const softDeleteExtension = Prisma.defineExtension({
   name: "soft-delete",
@@ -181,6 +185,7 @@ export const softDeleteExtension = Prisma.defineExtension({
 ### GraphQL (Pothos)
 
 **Schema builder** (`graphql/schema.ts`):
+
 ```typescript
 import SchemaBuilder from "@pothos/core";
 import PrismaPlugin from "@pothos/plugin-prisma";
@@ -196,6 +201,7 @@ export const builder = new SchemaBuilder<{
 ```
 
 **Types** — auto-mapped from Prisma:
+
 ```typescript
 builder.prismaObject("Invoice", {
   fields: (t) => ({
@@ -211,6 +217,7 @@ builder.prismaObject("Invoice", {
 ```
 
 **Queries:**
+
 ```typescript
 builder.queryField("invoices", (t) =>
   t.prismaField({
@@ -224,11 +231,12 @@ builder.queryField("invoices", (t) =>
         orderBy: { createdAt: "desc" },
       });
     },
-  })
+  }),
 );
 ```
 
 **Mutations — always return MutationResult:**
+
 ```typescript
 const MutationResult = builder.simpleObject("MutationResult", {
   fields: (t) => ({
@@ -252,15 +260,22 @@ builder.mutationField("createInvoice", (t) =>
       });
       return { ok: true, errors: null };
     },
-  })
+  }),
 );
 ```
 
 **Context** (`graphql/context.ts`):
+
 ```typescript
 export type GraphQLContext = {
-  user: (User & { groups: Array<{ group: { permissions: Array<{ permission: { slug: string } }> } }> }) | null;
-  permissions: Set<string>;  // Effective permissions (resolved from groups, "*" for superusers)
+  user:
+    | (User & {
+        groups: Array<{
+          group: { permissions: Array<{ permission: { slug: string } }> };
+        }>;
+      })
+    | null;
+  permissions: Set<string>; // Effective permissions (resolved from groups, "*" for superusers)
   prisma: PrismaClient;
   req: Request;
 };
@@ -269,8 +284,11 @@ export type GraphQLContext = {
 Context is created per-request. Session token is read from the `backend_jwt` cookie or `Authorization: Bearer` header. User + permissions are loaded eagerly.
 
 **Auth check at the top of every resolver and mutation.** No exceptions:
+
 ```typescript
-function requireAuth(ctx: GraphQLContext): asserts ctx is GraphQLContext & { user: User } {
+function requireAuth(
+  ctx: GraphQLContext,
+): asserts ctx is GraphQLContext & { user: User } {
   if (!ctx.user) throw new GraphQLError("Authentication required");
 }
 ```
@@ -315,6 +333,7 @@ export class InvoicesService {
 Group-based. Never assign directly to users.
 
 **Define:**
+
 ```typescript
 // permissions/roles.enum.ts
 export enum P {
@@ -326,6 +345,7 @@ export enum P {
 ```
 
 **Check in resolver:**
+
 ```typescript
 function requirePermission(ctx: GraphQLContext, slug: string) {
   if (ctx.user?.isSuperuser) return;
@@ -335,6 +355,7 @@ function requirePermission(ctx: GraphQLContext, slug: string) {
 ```
 
 **NestJS guard (for REST endpoints):**
+
 ```typescript
 @RequirePermission(P.INVOICE_VIEW)
 @Query(() => [InvoiceType])
@@ -342,6 +363,7 @@ async invoices(@Ctx() ctx: GraphQLContext) { ... }
 ```
 
 **Frontend guard:**
+
 ```tsx
 // Server Component
 await requirePermission(PermissionSlug.InvoiceView);
@@ -349,7 +371,7 @@ await requirePermission(PermissionSlug.InvoiceView);
 // Client Component
 <PermissionGuard permission={PermissionSlug.InvoiceView}>
   <InvoiceList />
-</PermissionGuard>
+</PermissionGuard>;
 ```
 
 ---
@@ -359,6 +381,7 @@ await requirePermission(PermissionSlug.InvoiceView);
 Auth0 for identity + backend session for API auth. httpOnly cookies. No JWT stored client-side.
 
 **Login flow:**
+
 1. Frontend redirects to Auth0 universal login
 2. Auth0 callback hits backend with authorization code
 3. Backend exchanges code for Auth0 tokens (id_token + access_token)
@@ -391,6 +414,7 @@ async validateSession(token: string): Promise<User | null> {
 ```
 
 **Auth0 env vars** (shared with Django edition — same Auth0 tenant):
+
 ```
 AUTH0_DOMAIN=conflict.us.auth0.com
 AUTH0_CLIENT_ID=...
@@ -400,6 +424,7 @@ AUTH0_DATABASE_CONNECTION_ID="Username-Password-Authentication"
 ```
 
 **Frontend auth gate** (`app/(app)/layout.tsx`):
+
 ```typescript
 // Server Component — checks for session cookie
 // If no cookie → redirect to /auth/login
@@ -413,6 +438,7 @@ AUTH0_DATABASE_CONNECTION_ID="Username-Password-Authentication"
 BullMQ is in `package.json` but job processors are not yet implemented. Workflow actions and email sending currently run synchronously in resolvers.
 
 When implementing BullMQ processors, follow this pattern:
+
 ```typescript
 // jobs/workflow-action.processor.ts
 @Processor("workflow-actions")
@@ -446,6 +472,7 @@ export const useCreateInvoice = () =>
 ```
 
 **Rules:**
+
 - Always set `fetchPolicy` explicitly
 - Always type parameters on `useQuery`/`useMutation`
 - For `cache-and-network`, gate loading on `loading && !data` to avoid spinners during background refetch
@@ -465,6 +492,7 @@ JSON Schema definitions rendered at runtime. No code changes to add a new form.
 **Field types:** text, textarea, number, integer, boolean, date, datetime, time, email, url, select, multi_select, radio, file, signature, rating, scale, pin, text_block, section_header, page_break, image, percentage_split, repeatable, user_lookup
 
 **Visual builders:**
+
 - AdminJS/custom: visual field editor
 - Next.js: `FormBuilder` component (@dnd-kit, live preview, per-type config)
 
@@ -481,15 +509,24 @@ JSON-defined state machines attached to any model via `targetModel` + `targetId`
 **Action types:** `notify_user`, `send_email`, `call_webhook`, `update_field`
 
 **Service pattern:**
+
 ```typescript
 // Start workflow
-const instance = await workflowService.start(workflow, targetModel, targetId, user);
+const instance = await workflowService.start(
+  workflow,
+  targetModel,
+  targetId,
+  user,
+);
 
 // Transition
 await workflowService.transition(instanceId, "approved", user, "Looks good");
 
 // Check available transitions
-const available = await workflowService.getAvailableTransitions(instanceId, user);
+const available = await workflowService.getAvailableTransitions(
+  instanceId,
+  user,
+);
 ```
 
 **Actions execute via BullMQ** — fire-and-forget with configurable retries.
@@ -511,6 +548,7 @@ export const features = {
 ```
 
 Conditionally register modules in `app.module.ts`:
+
 ```typescript
 @Module({
   imports: [
@@ -527,6 +565,7 @@ Conditionally register modules in `app.module.ts`:
 ### Validation
 
 Use **Zod** at API boundaries:
+
 ```typescript
 const CreateInvoiceSchema = z.object({
   name: z.string().min(1).max(200),
@@ -538,6 +577,7 @@ const parsed = CreateInvoiceSchema.parse(args);
 ```
 
 Use **Ajv** for JSON Schema validation (forms engine):
+
 ```typescript
 const ajv = new Ajv();
 const validate = ajv.compile(formDefinition.schema);
@@ -573,11 +613,9 @@ describe("createInvoice", () => {
   });
 
   it("denies unauthenticated access", async () => {
-    const res = await request(app.getHttpServer())
-      .post("/graphql")
-      .send({
-        query: `mutation { createInvoice(name: "Test", amount: 100) { ok } }`,
-      });
+    const res = await request(app.getHttpServer()).post("/graphql").send({
+      query: `mutation { createInvoice(name: "Test", amount: 100) { ok } }`,
+    });
 
     expect(res.body.errors[0].message).toContain("Authentication");
   });
@@ -585,6 +623,7 @@ describe("createInvoice", () => {
 ```
 
 **Rules:**
+
 - Assert against database state, not hardcoded strings
 - No empty test bodies
 - Test both allowed and denied permission cases
@@ -637,6 +676,7 @@ Setting `FEATURE_FORMS=false` removes forms types and resolvers from the GraphQL
 All env vars validated at startup via Zod (`config/env.ts`). App fails fast on missing config.
 
 **Naming convention:**
+
 - `DATABASE_URL` — Postgres connection string
 - `REDIS_URL` — Redis connection string
 - `S3_*` — MinIO/S3 config (ENDPOINT, BUCKET, ACCESS_KEY, SECRET_KEY)
@@ -647,6 +687,7 @@ All env vars validated at startup via Zod (`config/env.ts`). App fails fast on m
 - `NODE_ENV` — development | production | test
 
 **Files:**
+
 - `.env.example` — documented template (committed)
 - `.env` — local overrides (gitignored)
 - `.env.test` — test database URL (gitignored)
@@ -679,16 +720,16 @@ Open PRs against `main`. Keep PRs focused — one feature or fix per PR.
 
 ## Ports (local)
 
-| Service | URL |
-|---|---|
-| API (GraphQL) | http://localhost:4000/graphql |
-| Frontend | http://localhost:3000 |
-| Postgres | localhost:5432 |
-| Redis | localhost:6379 |
-| MinIO S3 API | http://localhost:9000 |
+| Service       | URL                                           |
+| ------------- | --------------------------------------------- |
+| API (GraphQL) | http://localhost:4000/graphql                 |
+| Frontend      | http://localhost:3000                         |
+| Postgres      | localhost:5432                                |
+| Redis         | localhost:6379                                |
+| MinIO S3 API  | http://localhost:9000                         |
 | MinIO Console | http://localhost:9001 (minioadmin/minioadmin) |
-| Mailpit | http://localhost:8025 |
-| Bull Board | http://localhost:4000/admin/queues |
+| Mailpit       | http://localhost:8025                         |
+| Bull Board    | http://localhost:4000/admin/queues            |
 
 ---
 

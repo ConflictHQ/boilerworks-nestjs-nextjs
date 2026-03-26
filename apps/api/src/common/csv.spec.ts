@@ -11,7 +11,9 @@ describe("CsvService", () => {
         { name: "Bob", email: "bob@test.com", age: "25" },
       ];
       const result = csv.toCSV(data);
-      expect(result).toBe("name,email,age\nAlice,alice@test.com,30\nBob,bob@test.com,25");
+      expect(result).toBe(
+        "name,email,age\nAlice,alice@test.com,30\nBob,bob@test.com,25",
+      );
     });
 
     it("escapes commas and quotes", () => {

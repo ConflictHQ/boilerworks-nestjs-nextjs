@@ -1,5 +1,5 @@
 import { builder } from "../graphql/builder";
-import { requireAuth, requirePermission } from "../common/guards/auth";
+import { requirePermission } from "../common/guards/auth";
 import { MutationResult, mutationOk, mutationError } from "../graphql/types";
 import { randomBytes, createHash, scryptSync } from "crypto";
 import { EmailService } from "../notifications/email.service";
@@ -21,7 +21,8 @@ builder.mutationField("inviteUser", (t) =>
       const existing = await ctx.prisma.user.findUnique({
         where: { email: args.email },
       });
-      if (existing) return mutationError("email", "User with this email already exists");
+      if (existing)
+        return mutationError("email", "User with this email already exists");
 
       // Create user with invited status (no password)
       const user = await ctx.prisma.user.create({
@@ -63,7 +64,8 @@ builder.mutationField("inviteUser", (t) =>
         },
       });
 
-      const frontendUrl = process.env.CORS_ORIGINS?.split(",")[0] || "http://localhost:3000";
+      const frontendUrl =
+        process.env.CORS_ORIGINS?.split(",")[0] || "http://localhost:3000";
       const inviteUrl = `${frontendUrl}/auth/accept-invitation?token=${rawToken}`;
 
       await emailService.sendInvitation(args.email, inviteUrl, ctx.user!.name);
@@ -83,7 +85,10 @@ builder.mutationField("acceptInvitation", (t) =>
     },
     resolve: async (_root, args, ctx) => {
       if (args.password.length < 8) {
-        return mutationError("password", "Password must be at least 8 characters");
+        return mutationError(
+          "password",
+          "Password must be at least 8 characters",
+        );
       }
 
       const tokenHash = createHash("sha256").update(args.token).digest("hex");
@@ -95,7 +100,8 @@ builder.mutationField("acceptInvitation", (t) =>
         },
       });
 
-      if (!session) return mutationError("token", "Invalid or expired invitation");
+      if (!session)
+        return mutationError("token", "Invalid or expired invitation");
 
       const salt = randomBytes(16).toString("hex");
       const hash = scryptSync(args.password, salt, 64).toString("hex");

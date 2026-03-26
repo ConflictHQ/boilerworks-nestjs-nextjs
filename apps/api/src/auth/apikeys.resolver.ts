@@ -11,12 +11,14 @@ const ApiKeyCreatedResult = builder.simpleObject("ApiKeyCreatedResult", {
     ok: t.boolean(),
     key: t.string({ nullable: true }),
     errors: t.field({
-      type: [builder.simpleObject("ApiKeyError", {
-        fields: (t) => ({
-          field: t.string({ nullable: true }),
-          message: t.string(),
+      type: [
+        builder.simpleObject("ApiKeyError", {
+          fields: (t) => ({
+            field: t.string({ nullable: true }),
+            message: t.string(),
+          }),
         }),
-      })],
+      ],
       nullable: true,
     }),
   }),

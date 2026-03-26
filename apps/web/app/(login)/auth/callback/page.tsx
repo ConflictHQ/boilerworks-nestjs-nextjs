@@ -29,9 +29,12 @@ function CallbackInner() {
     // Auth0 callback: exchange code for token via our backend
     if (code) {
       const apiRoot = process.env.NEXT_PUBLIC_API_ROOT ?? "http://localhost:4000";
-      fetch(`${apiRoot}/auth/callback?code=${encodeURIComponent(code)}&state=${encodeURIComponent(state || "")}`, {
-        credentials: "include",
-      })
+      fetch(
+        `${apiRoot}/auth/callback?code=${encodeURIComponent(code)}&state=${encodeURIComponent(state || "")}`,
+        {
+          credentials: "include",
+        }
+      )
         .then((res) => res.json())
         .then((data) => {
           if (!data.ok || !data.token) {

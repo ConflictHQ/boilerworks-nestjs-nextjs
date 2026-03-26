@@ -8,12 +8,12 @@ Sister project to [boilerworks-django-nextjs](https://github.com/ConflictHQ/boil
 
 ## Stack
 
-| Layer | Tech |
-|---|---|
-| Backend | NestJS 11, Prisma 6, Pothos GraphQL, GraphQL Yoga, Postgres 16, Redis 7 |
-| Frontend | Next.js 16 (App Router), Apollo Client 4, TypeScript, Tailwind CSS 4, shadcn/ui |
-| Auth | Auth0 SSO + password fallback, session-based (httpOnly cookies), group-based RBAC |
-| Infra | Docker Compose, MinIO (S3), Mailpit, OpenSearch, Prisma Studio |
+| Layer    | Tech                                                                              |
+| -------- | --------------------------------------------------------------------------------- |
+| Backend  | NestJS 11, Prisma 6, Pothos GraphQL, GraphQL Yoga, Postgres 16, Redis 7           |
+| Frontend | Next.js 16 (App Router), Apollo Client 4, TypeScript, Tailwind CSS 4, shadcn/ui   |
+| Auth     | Auth0 SSO + password fallback, session-based (httpOnly cookies), group-based RBAC |
+| Infra    | Docker Compose, MinIO (S3), Mailpit, OpenSearch, Prisma Studio                    |
 
 ---
 
@@ -59,16 +59,16 @@ Open http://localhost:3000 and log in with `admin@boilerworks.dev` / `admin123`.
 
 ## Local URLs
 
-| Service | URL |
-|---|---|
-| Frontend | http://localhost:3000 |
-| API (GraphQL) | http://localhost:4000/graphql |
-| Prisma Studio | http://localhost:5555 |
+| Service       | URL                                           |
+| ------------- | --------------------------------------------- |
+| Frontend      | http://localhost:3000                         |
+| API (GraphQL) | http://localhost:4000/graphql                 |
+| Prisma Studio | http://localhost:5555                         |
 | MinIO Console | http://localhost:9001 (minioadmin/minioadmin) |
-| Mailpit | http://localhost:8025 |
-| OpenSearch | http://localhost:9200 |
-| Postgres | localhost:5432 (dbadmin/dbadmin) |
-| Redis | localhost:6379 |
+| Mailpit       | http://localhost:8025                         |
+| OpenSearch    | http://localhost:9200                         |
+| Postgres      | localhost:5432 (dbadmin/dbadmin)              |
+| Redis         | localhost:6379                                |
 
 ---
 

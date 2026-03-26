@@ -5,13 +5,15 @@ const prisma = new PrismaClient();
 const authService = new AuthService(prisma as any);
 
 export type GraphQLContext = {
-  user: (User & {
-    groups: Array<{
-      group: {
-        permissions: Array<{ permission: { slug: string } }>;
-      };
-    }>;
-  }) | null;
+  user:
+    | (User & {
+        groups: Array<{
+          group: {
+            permissions: Array<{ permission: { slug: string } }>;
+          };
+        }>;
+      })
+    | null;
   permissions: Set<string>;
   prisma: PrismaClient;
   req: Request;

@@ -7,6 +7,34 @@ import { randomBytes } from "crypto";
 
 import "./uploads.types";
 
+const ALLOWED_CONTENT_TYPES = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/gif",
+  "image/webp",
+  "image/svg+xml",
+  "application/pdf",
+  "text/plain",
+  "text/csv",
+  "application/json",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "application/vnd.ms-excel",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "application/zip",
+]);
+
+const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50 MB
+
+function sanitizeFilename(filename: string): string {
+  // Strip path traversal sequences and null bytes, keep only the basename
+  return filename
+    .replace(/\0/g, "")
+    .replace(/\.\./g, "")
+    .replace(/[/\\]/g, "_")
+    .trim();
+}
+
 const s3 = new S3Client({
   endpoint: process.env.S3_ENDPOINT || "http://localhost:9000",
   region: "us-east-1",
@@ -53,19 +81,31 @@ builder.mutationField("requestUpload", (t) =>
       requireAuth(ctx);
       requirePermission(ctx, "uploads.create");
 
-      const key = `uploads/${Date.now()}-${randomBytes(8).toString("hex")}-${args.filename}`;
+      if (!ALLOWED_CONTENT_TYPES.has(args.contentType)) {
+        throw new Error(
+          `Content type "${args.contentType}" is not allowed. Allowed types: ${[...ALLOWED_CONTENT_TYPES].join(", ")}`,
+        );
+      }
+
+      const safeFilename = sanitizeFilename(args.filename);
+      if (!safeFilename) {
+        throw new Error("Invalid filename");
+      }
+
+      const key = `uploads/${Date.now()}-${randomBytes(8).toString("hex")}-${safeFilename}`;
 
       const command = new PutObjectCommand({
         Bucket: bucket,
         Key: key,
         ContentType: args.contentType,
+        ContentLength: MAX_FILE_SIZE,
       });
 
       const presignedUrl = await getSignedUrl(s3, command, { expiresIn: 3600 });
 
       const upload = await ctx.prisma.upload.create({
         data: {
-          filename: args.filename,
+          filename: safeFilename,
           contentType: args.contentType,
           size: 0,
           s3Key: key,
@@ -93,8 +133,15 @@ builder.mutationField("confirmUpload", (t) =>
       requireAuth(ctx);
 
       // Verify the upload belongs to the current user
-      const upload = await ctx.prisma.upload.findUnique({ where: { id: args.id } });
-      if (!upload || (upload.uploadedById && upload.uploadedById !== ctx.user!.id && !ctx.user!.isSuperuser)) {
+      const upload = await ctx.prisma.upload.findUnique({
+        where: { id: args.id },
+      });
+      if (
+        !upload ||
+        (upload.uploadedById &&
+          upload.uploadedById !== ctx.user!.id &&
+          !ctx.user!.isSuperuser)
+      ) {
         return mutationError(null, "Upload not found or access denied");
       }
 
@@ -115,6 +162,18 @@ builder.mutationField("deleteUpload", (t) =>
     },
     resolve: async (_root, args, ctx) => {
       requirePermission(ctx, "uploads.delete");
+
+      const upload = await ctx.prisma.upload.findUnique({
+        where: { id: args.id },
+      });
+      if (
+        !upload ||
+        (upload.uploadedById &&
+          upload.uploadedById !== ctx.user!.id &&
+          !ctx.user!.isSuperuser)
+      ) {
+        return mutationError(null, "Upload not found or access denied");
+      }
 
       await ctx.prisma.upload.delete({ where: { id: args.id } });
       return mutationOk();

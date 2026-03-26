@@ -33,7 +33,8 @@ builder.mutationField("requestPasswordReset", (t) =>
         },
       });
 
-      const frontendUrl = process.env.CORS_ORIGINS?.split(",")[0] || "http://localhost:3000";
+      const frontendUrl =
+        process.env.CORS_ORIGINS?.split(",")[0] || "http://localhost:3000";
       const resetUrl = `${frontendUrl}/auth/reset-password?token=${rawToken}`;
 
       await emailService.sendPasswordReset(user.email, resetUrl);
@@ -52,7 +53,10 @@ builder.mutationField("resetPassword", (t) =>
     },
     resolve: async (_root, args, ctx) => {
       if (args.newPassword.length < 8) {
-        return mutationError("newPassword", "Password must be at least 8 characters");
+        return mutationError(
+          "newPassword",
+          "Password must be at least 8 characters",
+        );
       }
 
       const tokenHash = createHash("sha256").update(args.token).digest("hex");

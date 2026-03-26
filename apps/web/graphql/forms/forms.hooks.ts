@@ -7,11 +7,7 @@ import {
   ARCHIVE_FORM,
   SUBMIT_FORM,
 } from "./forms.mutations";
-import {
-  GET_FORM_DEFINITION,
-  GET_FORM_DEFINITIONS,
-  GET_FORM_SUBMISSIONS,
-} from "./forms.queries";
+import { GET_FORM_DEFINITION, GET_FORM_DEFINITIONS, GET_FORM_SUBMISSIONS } from "./forms.queries";
 import type {
   FormDefinitionData,
   FormDefinitionsData,
@@ -65,5 +61,4 @@ export const useArchiveForm = () =>
     refetchQueries: [GET_FORM_DEFINITIONS],
   });
 
-export const useSubmitForm = () =>
-  useMutation<MutationResultData>(SUBMIT_FORM);
+export const useSubmitForm = () => useMutation<MutationResultData>(SUBMIT_FORM);

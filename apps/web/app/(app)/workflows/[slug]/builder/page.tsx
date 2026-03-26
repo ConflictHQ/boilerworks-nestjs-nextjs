@@ -69,7 +69,10 @@ export default function WorkflowBuilderPage() {
         states={workflow.states || []}
         transitions={workflow.transitions || []}
         onSave={handleSave}
-        availableForms={(forms ?? []).map((f: { slug: string; name: string }) => ({ slug: f.slug, name: f.name }))}
+        availableForms={(forms ?? []).map((f: { slug: string; name: string }) => ({
+          slug: f.slug,
+          name: f.name,
+        }))}
       />
     </div>
   );

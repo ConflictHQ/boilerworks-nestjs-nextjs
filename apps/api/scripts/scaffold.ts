@@ -210,9 +210,13 @@ export const use${pascal} = () => {
   console.log(`✓ Frontend page: app/(app)/${name}/page.tsx`);
   console.log("");
   console.log("Next steps:");
-  console.log(`  1. Add Prisma model for ${singularPascal} to prisma/schema.prisma`);
+  console.log(
+    `  1. Add Prisma model for ${singularPascal} to prisma/schema.prisma`,
+  );
   console.log(`  2. Run: npx prisma migrate dev --name add_${name}`);
-  console.log(`  3. Uncomment and fill in ${name}.types.ts and ${name}.resolver.ts`);
+  console.log(
+    `  3. Uncomment and fill in ${name}.types.ts and ${name}.resolver.ts`,
+  );
   console.log(`  4. Import resolver in src/graphql/schema.ts`);
   console.log(`  5. Add nav item in apps/web/components/AppSidebar.tsx`);
 }

@@ -1,11 +1,7 @@
 import { Prisma } from "@prisma/client";
 
 // Models that use soft-delete via deletedAt field
-const SOFT_DELETE_MODELS = [
-  "FormDefinition",
-  "WorkflowDefinition",
-  "Upload",
-];
+const SOFT_DELETE_MODELS = ["FormDefinition", "WorkflowDefinition", "Upload"];
 
 /**
  * Prisma extension for soft-delete behavior:
@@ -19,7 +15,10 @@ export const softDeleteExtension = Prisma.defineExtension({
         if (SOFT_DELETE_MODELS.includes(model)) {
           const where = args.where as Record<string, unknown> | undefined;
           if (!where?.deletedAt) {
-            args.where = { ...args.where, deletedAt: null } as unknown as typeof args.where;
+            args.where = {
+              ...args.where,
+              deletedAt: null,
+            } as unknown as typeof args.where;
           }
         }
         return query(args);
@@ -28,7 +27,10 @@ export const softDeleteExtension = Prisma.defineExtension({
         if (SOFT_DELETE_MODELS.includes(model)) {
           const where = args.where as Record<string, unknown> | undefined;
           if (!where?.deletedAt) {
-            args.where = { ...args.where, deletedAt: null } as unknown as typeof args.where;
+            args.where = {
+              ...args.where,
+              deletedAt: null,
+            } as unknown as typeof args.where;
           }
         }
         return query(args);

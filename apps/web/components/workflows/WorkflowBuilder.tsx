@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import {
   ReactFlow,
   addEdge,
@@ -77,9 +77,17 @@ type WorkflowTransition = {
 
 type FormOption = { slug: string; name: string };
 
+type WorkflowBuilderInput = {
+  fromState: string;
+  toState: string;
+  label: string;
+  conditions?: unknown[];
+  actions?: unknown[];
+};
+
 type WorkflowBuilderProps = {
   states: WorkflowState[];
-  transitions: WorkflowTransition[];
+  transitions: WorkflowBuilderInput[];
   onSave: (states: WorkflowState[], transitions: WorkflowTransition[]) => void;
   availableForms?: FormOption[];
 };
@@ -214,10 +222,7 @@ function ConditionEditor({
           className="flex flex-col gap-1.5 rounded border bg-gray-50 p-2 dark:bg-gray-900"
         >
           <div className="flex items-center gap-1">
-            <Select
-              value={cond.type}
-              onValueChange={(v) => updateCondition(i, { type: v })}
-            >
+            <Select value={cond.type} onValueChange={(v) => updateCondition(i, { type: v })}>
               <SelectTrigger className="h-7 flex-1 text-xs">
                 <SelectValue />
               </SelectTrigger>
@@ -293,10 +298,7 @@ function ActionEditor({
   onChange: (a: Action[]) => void;
 }) {
   const addAction = () =>
-    onChange([
-      ...actions,
-      { type: "notify_user", user: "current_user", subject: "", message: "" },
-    ]);
+    onChange([...actions, { type: "notify_user", user: "current_user", subject: "", message: "" }]);
   const removeAction = (i: number) => onChange(actions.filter((_, idx) => idx !== i));
   const updateAction = (i: number, updates: Partial<Action>) =>
     onChange(actions.map((a, idx) => (idx === i ? { ...a, ...updates } : a)));
@@ -320,10 +322,7 @@ function ActionEditor({
           className="flex flex-col gap-1.5 rounded border bg-gray-50 p-2 dark:bg-gray-900"
         >
           <div className="flex items-center gap-1">
-            <Select
-              value={action.type}
-              onValueChange={(v) => updateAction(i, { type: v })}
-            >
+            <Select value={action.type} onValueChange={(v) => updateAction(i, { type: v })}>
               <SelectTrigger className="h-7 flex-1 text-xs">
                 <SelectValue />
               </SelectTrigger>
@@ -418,36 +417,15 @@ export function WorkflowBuilder({
   availableForms = [],
 }: WorkflowBuilderProps) {
   const [workflowStates, setWorkflowStates] = useState<WorkflowState[]>(initialStates);
-  const [workflowTransitions, setWorkflowTransitions] =
-    useState<WorkflowTransition[]>(initialTransitions);
+  const [workflowTransitions, setWorkflowTransitions] = useState<WorkflowTransition[]>(
+    initialTransitions.map((t) => ({
+      ...t,
+      conditions: (t.conditions || []) as Condition[],
+      actions: (t.actions || []) as Action[],
+    }))
+  );
   const [selectedStateName, setSelectedStateName] = useState<string | null>(null);
   const [selectedEdgeId, setSelectedEdgeId] = useState<string | null>(null);
-
-  const buildNodes = useCallback(
-    (states: WorkflowState[], existingNodes: Node[]): Node[] => {
-      return states.map((state, i) => {
-        const existing = existingNodes.find((n) => n.id === state.name);
-        return {
-          id: state.name,
-          type: "stateNode",
-          position: existing?.position ?? { x: 250, y: i * 150 },
-          selected: state.name === selectedStateName,
-          data: {
-            ...state,
-            onSelect: () => setSelectedStateName(state.name),
-            onDelete: () => removeState(state.name),
-          },
-        };
-      });
-    },
-    [selectedStateName],
-  );
-
-  const initialNodes: Node[] = useMemo(
-    () => buildNodes(initialStates, []),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [],
-  );
 
   const initialEdges: Edge[] = useMemo(
     () =>
@@ -461,18 +439,64 @@ export function WorkflowBuilder({
         style: { strokeWidth: 2 },
       })),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [],
+    []
   );
 
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+  const [nodes, setNodes, onNodesChange] = useNodesState([] as Node[]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState([] as Edge[]);
+
+  const removeStateRef = React.useRef<(name: string) => void>(() => {});
+
+  const buildNodes = useCallback(
+    (states: WorkflowState[], existingNodes: Node[]): Node[] => {
+      return states.map((state, i) => {
+        const existing = existingNodes.find((n) => n.id === state.name);
+        return {
+          id: state.name,
+          type: "stateNode",
+          position: existing?.position ?? { x: 250, y: i * 150 },
+          selected: state.name === selectedStateName,
+          data: {
+            ...state,
+            onSelect: () => setSelectedStateName(state.name),
+            onDelete: () => removeStateRef.current(state.name),
+          },
+        };
+      });
+    },
+    [selectedStateName]
+  );
 
   const refreshNodes = useCallback(
-    (states: WorkflowState[]) => {
-      setNodes((currentNodes) => buildNodes(states, currentNodes));
+    (states: WorkflowState[]): void => {
+      setNodes((currentNodes: Node[]) => buildNodes(states, currentNodes));
     },
-    [buildNodes, setNodes],
+    [buildNodes, setNodes]
   );
+
+  // Initialize nodes and edges on mount
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useMemo(() => {
+    setNodes(buildNodes(initialStates, []));
+    setEdges(initialEdges as Edge[]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const removeState = useCallback(
+    (name: string): void => {
+      const updated = workflowStates.filter((s) => s.name !== name);
+      setWorkflowStates(updated);
+      setEdges((eds) => eds.filter((e) => e.source !== name && e.target !== name));
+      setWorkflowTransitions((prev) =>
+        prev.filter((t) => t.fromState !== name && t.toState !== name)
+      );
+      if (selectedStateName === name) setSelectedStateName(null);
+      refreshNodes(updated);
+    },
+    [workflowStates, selectedStateName, refreshNodes, setEdges]
+  );
+
+  removeStateRef.current = removeState;
 
   const onConnect = useCallback(
     (connection: Connection) => {
@@ -485,7 +509,7 @@ export function WorkflowBuilder({
         markerEnd: { type: MarkerType.ArrowClosed },
         style: { strokeWidth: 2 },
       };
-      setEdges((eds) => addEdge(newEdge, eds) as typeof eds);
+      setEdges((eds) => addEdge<Edge>(newEdge, eds));
       setWorkflowTransitions((prev) => [
         ...prev,
         {
@@ -497,7 +521,7 @@ export function WorkflowBuilder({
         },
       ]);
     },
-    [setEdges],
+    [setEdges]
   );
 
   const addState = () => {
@@ -513,17 +537,6 @@ export function WorkflowBuilder({
     const updated = [...workflowStates, newState];
     setWorkflowStates(updated);
     setSelectedStateName(name);
-    refreshNodes(updated);
-  };
-
-  const removeState = (name: string) => {
-    const updated = workflowStates.filter((s) => s.name !== name);
-    setWorkflowStates(updated);
-    setEdges((eds) => eds.filter((e) => e.source !== name && e.target !== name));
-    setWorkflowTransitions((prev) =>
-      prev.filter((t) => t.fromState !== name && t.toState !== name),
-    );
-    if (selectedStateName === name) setSelectedStateName(null);
     refreshNodes(updated);
   };
 
@@ -544,7 +557,7 @@ export function WorkflowBuilder({
     if (!edge) return;
     setEdges((eds) => eds.filter((e) => e.id !== edgeId));
     setWorkflowTransitions((prev) =>
-      prev.filter((t) => !(t.fromState === edge.source && t.toState === edge.target)),
+      prev.filter((t) => !(t.fromState === edge.source && t.toState === edge.target))
     );
     setSelectedEdgeId(null);
   };
@@ -555,8 +568,8 @@ export function WorkflowBuilder({
     if (edge) {
       setWorkflowTransitions((prev) =>
         prev.map((t) =>
-          t.fromState === edge.source && t.toState === edge.target ? { ...t, label } : t,
-        ),
+          t.fromState === edge.source && t.toState === edge.target ? { ...t, label } : t
+        )
       );
     }
   };
@@ -566,8 +579,8 @@ export function WorkflowBuilder({
     if (edge) {
       setWorkflowTransitions((prev) =>
         prev.map((t) =>
-          t.fromState === edge.source && t.toState === edge.target ? { ...t, conditions } : t,
-        ),
+          t.fromState === edge.source && t.toState === edge.target ? { ...t, conditions } : t
+        )
       );
     }
   };
@@ -577,8 +590,8 @@ export function WorkflowBuilder({
     if (edge) {
       setWorkflowTransitions((prev) =>
         prev.map((t) =>
-          t.fromState === edge.source && t.toState === edge.target ? { ...t, actions } : t,
-        ),
+          t.fromState === edge.source && t.toState === edge.target ? { ...t, actions } : t
+        )
       );
     }
   };
@@ -586,7 +599,7 @@ export function WorkflowBuilder({
   const handleSave = () => {
     const currentTransitions = edges.map((e) => {
       const wt = workflowTransitions.find(
-        (t) => t.fromState === e.source && t.toState === e.target,
+        (t) => t.fromState === e.source && t.toState === e.target
       );
       return {
         fromState: e.source,
@@ -603,7 +616,7 @@ export function WorkflowBuilder({
   const selectedEdge = edges.find((e) => e.id === selectedEdgeId);
   const selectedTransition = selectedEdge
     ? workflowTransitions.find(
-        (t) => t.fromState === selectedEdge.source && t.toState === selectedEdge.target,
+        (t) => t.fromState === selectedEdge.source && t.toState === selectedEdge.target
       )
     : null;
 
@@ -649,8 +662,10 @@ export function WorkflowBuilder({
 
         {/* Properties panel */}
         {(selectedState || selectedEdge) && (
-          <div className="w-80 shrink-0 overflow-y-auto rounded-lg border bg-white p-4 dark:bg-gray-950"
-               style={{ maxHeight: 500 }}>
+          <div
+            className="w-80 shrink-0 overflow-y-auto rounded-lg border bg-white p-4 dark:bg-gray-950"
+            style={{ maxHeight: 500 }}
+          >
             {/* ---- STATE PANEL ---- */}
             {selectedState && (
               <div className="flex flex-col gap-3">
@@ -721,9 +736,7 @@ export function WorkflowBuilder({
                   <input
                     type="checkbox"
                     checked={selectedState.isFinal}
-                    onChange={(e) =>
-                      updateState(selectedState.name, { isFinal: e.target.checked })
-                    }
+                    onChange={(e) => updateState(selectedState.name, { isFinal: e.target.checked })}
                     className="h-4 w-4 rounded"
                   />
                   <span className="text-sm">Final state (end)</span>

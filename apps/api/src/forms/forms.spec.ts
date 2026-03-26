@@ -59,7 +59,10 @@ describe("Forms Engine", () => {
         payload: { name: "Test User", email: "test@test.com" },
       },
     });
-    expect(submission.payload).toEqual({ name: "Test User", email: "test@test.com" });
+    expect(submission.payload).toEqual({
+      name: "Test User",
+      email: "test@test.com",
+    });
     expect(submission.status).toBe("submitted");
   });
 

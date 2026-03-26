@@ -24,7 +24,8 @@ export class AllExceptionsFilter implements ExceptionFilter {
       message =
         typeof exResponse === "string"
           ? exResponse
-          : (exResponse as Record<string, unknown>).message?.toString() || exception.message;
+          : (exResponse as Record<string, unknown>).message?.toString() ||
+            exception.message;
       error = exception.name;
     } else if (exception instanceof Prisma.PrismaClientKnownRequestError) {
       if (exception.code === "P2002") {

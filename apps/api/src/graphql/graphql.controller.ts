@@ -1,13 +1,33 @@
 import { All, Controller, Req, Res } from "@nestjs/common";
 import { createYoga } from "graphql-yoga";
+import { NoSchemaIntrospectionCustomRule } from "graphql";
 import { schema } from "./schema";
 import { createContext } from "./context";
+import { depthLimitRule } from "./depth-limit";
 import type { Request, Response } from "express";
+
+const isProduction = process.env.NODE_ENV === "production";
 
 const yoga = createYoga({
   schema,
   graphqlEndpoint: "/graphql",
-  landingPage: true,
+  landingPage: !isProduction,
+  graphiql: !isProduction,
+  maskedErrors: isProduction,
+  plugins: [
+    {
+      onValidate({
+        addValidationRule,
+      }: {
+        addValidationRule: (rule: unknown) => void;
+      }) {
+        addValidationRule(depthLimitRule(10));
+        if (isProduction) {
+          addValidationRule(NoSchemaIntrospectionCustomRule);
+        }
+      },
+    },
+  ],
   context: ({ request }) => createContext(request),
 });
 

@@ -10,20 +10,30 @@ import { CheckIcon, CheckCheckIcon } from "lucide-react";
 
 const GET_NOTIFICATIONS = gql`
   query GetNotifications {
-    notifications { id subject message isRead createdAt }
+    notifications {
+      id
+      subject
+      message
+      isRead
+      createdAt
+    }
     unreadNotificationCount
   }
 `;
 
 const MARK_READ = gql`
   mutation MarkRead($id: String!) {
-    markNotificationRead(id: $id) { ok }
+    markNotificationRead(id: $id) {
+      ok
+    }
   }
 `;
 
 const MARK_ALL_READ = gql`
   mutation MarkAllRead {
-    markAllNotificationsRead { ok }
+    markAllNotificationsRead {
+      ok
+    }
   }
 `;
 
@@ -88,7 +98,11 @@ export default function NotificationsPage() {
                 <span className={`text-sm ${!n.isRead ? "font-semibold" : "font-medium"}`}>
                   {n.subject}
                 </span>
-                {!n.isRead && <Badge variant="default" className="text-[10px]">New</Badge>}
+                {!n.isRead && (
+                  <Badge variant="default" className="text-[10px]">
+                    New
+                  </Badge>
+                )}
               </div>
               <p className="text-muted-foreground mt-1 text-sm">{n.message}</p>
               <p className="text-muted-foreground mt-1 text-xs">
@@ -103,7 +117,7 @@ export default function NotificationsPage() {
           </div>
         ))}
         {notifications.length === 0 && !loading && (
-          <p className="py-12 text-center text-sm text-muted-foreground">No notifications yet.</p>
+          <p className="text-muted-foreground py-12 text-center text-sm">No notifications yet.</p>
         )}
       </div>
     </div>

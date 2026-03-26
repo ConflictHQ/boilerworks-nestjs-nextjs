@@ -1,6 +1,6 @@
 import { builder } from "../graphql/builder";
 import { requireAuth, requirePermission } from "../common/guards/auth";
-import { requireFeature } from "../config/features";
+
 import { MutationResult, mutationOk, mutationError } from "../graphql/types";
 
 // Import types (side-effect)
@@ -100,7 +100,11 @@ builder.mutationField("createWorkflowDefinition", (t) =>
       const existing = await ctx.prisma.workflowDefinition.findFirst({
         where: { slug: args.slug, modelName: args.modelName },
       });
-      if (existing) return mutationError("slug", "Workflow with this slug already exists for this model");
+      if (existing)
+        return mutationError(
+          "slug",
+          "Workflow with this slug already exists for this model",
+        );
 
       await ctx.prisma.workflowDefinition.create({
         data: {
@@ -191,9 +195,13 @@ builder.mutationField("startWorkflow", (t) =>
       const workflow = await ctx.prisma.workflowDefinition.findFirst({
         where: { slug: args.workflowSlug, isEnabled: true },
       });
-      if (!workflow) return mutationError(null, "Workflow not found or disabled");
+      if (!workflow)
+        return mutationError(null, "Workflow not found or disabled");
 
-      const states = workflow.states as Array<{ name: string; isInitial?: boolean }>;
+      const states = workflow.states as Array<{
+        name: string;
+        isInitial?: boolean;
+      }>;
       const initialState = states.find((s) => s.isInitial);
       if (!initialState) return mutationError(null, "No initial state defined");
 
@@ -238,7 +246,8 @@ builder.mutationField("transitionWorkflow", (t) =>
         include: { workflow: true },
       });
       if (!instance) return mutationError(null, "Instance not found");
-      if (instance.completedAt) return mutationError(null, "Workflow already completed");
+      if (instance.completedAt)
+        return mutationError(null, "Workflow already completed");
 
       const transitions = instance.workflow.transitions as Array<{
         fromState: string;
@@ -247,7 +256,8 @@ builder.mutationField("transitionWorkflow", (t) =>
       }>;
 
       const validTransition = transitions.find(
-        (t) => t.fromState === instance.currentState && t.toState === args.toState,
+        (t) =>
+          t.fromState === instance.currentState && t.toState === args.toState,
       );
       if (!validTransition) {
         return mutationError(

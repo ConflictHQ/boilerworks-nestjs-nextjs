@@ -9,14 +9,22 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
 const GET_GROUPS = gql`
-  query GetGroups { groups { id name } }
+  query GetGroups {
+    groups {
+      id
+      name
+    }
+  }
 `;
 
 const INVITE_USER = gql`
   mutation InviteUser($email: String!, $groupIds: [String!]!) {
     inviteUser(email: $email, groupIds: $groupIds) {
       ok
-      errors { field message }
+      errors {
+        field
+        message
+      }
     }
   }
 `;
@@ -40,11 +48,14 @@ export default function InviteUserPage() {
       variables: { email, groupIds: selectedGroups },
     });
 
-    if (data?.inviteUser?.ok) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const result = data as Record<string, unknown>;
+    if ((result?.inviteUser as Record<string, unknown>)?.ok) {
       toast.success(`Invitation sent to ${email}`);
       router.push("/users");
     } else {
-      const err = data?.inviteUser?.errors?.[0];
+      const inviteResult = result?.inviteUser as Record<string, unknown> | undefined;
+      const err = (inviteResult?.errors as Array<{ message: string }> | undefined)?.[0];
       toast.error(err?.message || "Failed to send invitation");
     }
     setSubmitting(false);
@@ -64,7 +75,9 @@ export default function InviteUserPage() {
 
       <form onSubmit={handleSubmit} className="max-w-md space-y-4">
         <div className="space-y-2">
-          <label htmlFor="email" className="text-sm font-medium">Email</label>
+          <label htmlFor="email" className="text-sm font-medium">
+            Email
+          </label>
           <input
             id="email"
             type="email"
@@ -87,9 +100,7 @@ export default function InviteUserPage() {
                   checked={selectedGroups.includes(group.id)}
                   onChange={(e) => {
                     setSelectedGroups((prev) =>
-                      e.target.checked
-                        ? [...prev, group.id]
-                        : prev.filter((id) => id !== group.id),
+                      e.target.checked ? [...prev, group.id] : prev.filter((id) => id !== group.id)
                     );
                   }}
                 />

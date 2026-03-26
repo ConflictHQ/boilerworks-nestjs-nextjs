@@ -59,7 +59,7 @@ export default function NewWorkflowPage() {
       router.push(`/workflows/${data.slug}/builder`);
     } else {
       for (const e of result?.createWorkflowDefinition?.errors ?? []) {
-        toast.error(`${e.field}: ${e.messages.join(", ")}`);
+        toast.error(`${e.field}: ${e.message}`);
       }
     }
   };

@@ -166,6 +166,7 @@ const filters: FilterConfig[] = [
 ```
 
 **Key rules:**
+
 - Filter `id` must match `accessorKey`
 - Use `DataTableColumnHeader` for all headers — handles sort icon UI
 - Pagination and global search are built-in
@@ -176,16 +177,16 @@ For GraphQL-backed tables use `DataTableServer` + `usePaginatedQuery`.
 
 ```typescript
 const result = usePaginatedQuery<TVariables, TData, TItem, TExtractedData>({
-  query,          // DocumentNode
-  variables,      // static partial variables
-  ancestor,       // key into data — e.g. "users" → data.users.edges / totalCount
-  dataExtractor,  // (edges: TItem[]) => TExtractedData[]
-  storageKey,     // localStorage key for persisted perPage preference
-  fetchPolicy,    // required — e.g. "cache-and-network"
-  urlSync,        // false | true | "prefix" — syncs pagination to URL params
-  filterKeys,     // string[] — filter IDs to track
-  variablesFromFilters,  // (filters) => Partial<TVariables>
-  variablesFromSorting,  // (sorting) => Partial<TVariables>
+  query, // DocumentNode
+  variables, // static partial variables
+  ancestor, // key into data — e.g. "users" → data.users.edges / totalCount
+  dataExtractor, // (edges: TItem[]) => TExtractedData[]
+  storageKey, // localStorage key for persisted perPage preference
+  fetchPolicy, // required — e.g. "cache-and-network"
+  urlSync, // false | true | "prefix" — syncs pagination to URL params
+  filterKeys, // string[] — filter IDs to track
+  variablesFromFilters, // (filters) => Partial<TVariables>
+  variablesFromSorting, // (sorting) => Partial<TVariables>
 });
 ```
 
@@ -198,6 +199,7 @@ Co-locate columns, filters, and the hook in `graphql/<domain>/<domain>.hooks.tsx
 Session-based. Backend sets an httpOnly cookie on login.
 
 **Frontend auth gate** (`app/(app)/layout.tsx`):
+
 - Server Component — checks for session cookie
 - If no cookie → redirect to `/auth/login`
 - If cookie → fetch user via GraphQL → render children
@@ -216,16 +218,19 @@ lib/auth-client.ts  — useCurrentUser() hook (client)
 Two clients — one for server (RSC), one for client components.
 
 **Server client** (`lib/apollo/client.ts`):
+
 - Uses `registerApolloClient` from `@apollo/client-integration-nextjs`
 - Reads session cookie for auth
 - Exports `getClient`, `query`, `PreloadQuery`
 
 **Client provider** (`lib/apollo/provider.tsx`):
+
 - `"use client"` — wraps app in `ApolloNextAppProvider`
 - Token injected per-request via auth link
 - Includes `errorLink`: redirects to `/auth/login` on `UNAUTHENTICATED`
 
 **Cache** (`lib/apollo/cache.ts`):
+
 - `InMemoryCache` from `@apollo/client-integration-nextjs` (required for SSR)
 - `typePolicies` defined explicitly — no Proxy catch-all
 - Add `merge: true` per type as needed
@@ -270,7 +275,10 @@ export type MyQueryVariables = { id: string };
 ```typescript
 export const GET_THING = gql`
   query GetThing($id: ID!) {
-    thing(id: $id) { id name }
+    thing(id: $id) {
+      id
+      name
+    }
   }
 `;
 ```
@@ -313,7 +321,13 @@ const { data } = await client.query({ query: GET_THING, variables: { id } });
 ```typescript
 export const UPDATE_THING = gql`
   mutation UpdateThing($input: UpdateThingInput!) {
-    updateThing(input: $input) { ok errors { field message } }
+    updateThing(input: $input) {
+      ok
+      errors {
+        field
+        message
+      }
+    }
   }
 `;
 ```
@@ -343,7 +357,9 @@ export const THING_FIELDS = gql`
 
 export const GET_THING = gql`
   query GetThing($id: ID!) {
-    thing(id: $id) { ...ThingFields }
+    thing(id: $id) {
+      ...ThingFields
+    }
   }
   ${THING_FIELDS}
 `;
@@ -353,11 +369,11 @@ export const GET_THING = gql`
 
 ## RSC vs Client Component Rules
 
-|               | Server Component               | Client Component                              |
-| ------------- | ------------------------------ | --------------------------------------------- |
-| Data fetching | `await getClient().query(...)` | `useQuery` hook via `<domain>.hooks.ts`       |
-| Mutations     | not applicable                 | `useMutation` hook via `<domain>.hooks.ts`    |
-| Auth state    | `getSession()` from `lib/auth` | `useCurrentUser()` hook                       |
+|               | Server Component               | Client Component                           |
+| ------------- | ------------------------------ | ------------------------------------------ |
+| Data fetching | `await getClient().query(...)` | `useQuery` hook via `<domain>.hooks.ts`    |
+| Mutations     | not applicable                 | `useMutation` hook via `<domain>.hooks.ts` |
+| Auth state    | `getSession()` from `lib/auth` | `useCurrentUser()` hook                    |
 
 - Never use `useQuery` / `useMutation` in a Server Component
 - Never use `getClient()` in a Client Component — use hooks instead
@@ -399,7 +415,7 @@ import { PermissionSlug } from "@/graphql/permissions/permissions.types";
 
 <PermissionGuard permission={PermissionSlug.MyFeature}>
   <MyContent />
-</PermissionGuard>
+</PermissionGuard>;
 ```
 
 ---
@@ -468,6 +484,7 @@ if (ok) deleteItem();
 ## Codegen (planned)
 
 When `@graphql-codegen/cli` is added:
+
 - Output to `__generated__/graphql.ts`
 - Replace manual types in `*.types.ts` with generated imports
 - `TypedDocumentNode` makes explicit `useQuery<Data, Vars>` type params optional

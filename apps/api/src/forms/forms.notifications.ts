@@ -11,7 +11,9 @@ export async function notifyFormEvent(
   submissionId?: string,
   userId?: string,
 ) {
-  const form = await prisma.formDefinition.findUnique({ where: { id: formId } });
+  const form = await prisma.formDefinition.findUnique({
+    where: { id: formId },
+  });
   if (!form) return;
 
   const notificationConfig = form.notificationConfig as {

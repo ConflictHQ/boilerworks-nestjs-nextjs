@@ -36,8 +36,15 @@ builder.queryField("search", (t) =>
 
       // Placeholder — would use SearchService when OpenSearch is running
       // For now, do a simple Prisma text search as fallback
-      const models = args.model ? [args.model] : ["User", "FormDefinition", "WorkflowDefinition"];
-      const hits: Array<{ id: string; score: number; model: string; data: unknown }> = [];
+      const models = args.model
+        ? [args.model]
+        : ["User", "FormDefinition", "WorkflowDefinition"];
+      const hits: Array<{
+        id: string;
+        score: number;
+        model: string;
+        data: unknown;
+      }> = [];
 
       for (const model of models) {
         if (model === "User") {
@@ -50,7 +57,14 @@ builder.queryField("search", (t) =>
             },
             take: args.limit ?? 10,
           });
-          hits.push(...users.map((u) => ({ id: u.id, score: 1, model: "User", data: { name: u.name, email: u.email } })));
+          hits.push(
+            ...users.map((u) => ({
+              id: u.id,
+              score: 1,
+              model: "User",
+              data: { name: u.name, email: u.email },
+            })),
+          );
         }
         if (model === "FormDefinition") {
           const forms = await ctx.prisma.formDefinition.findMany({
@@ -62,7 +76,14 @@ builder.queryField("search", (t) =>
             },
             take: args.limit ?? 10,
           });
-          hits.push(...forms.map((f) => ({ id: f.id, score: 1, model: "FormDefinition", data: { name: f.name, slug: f.slug } })));
+          hits.push(
+            ...forms.map((f) => ({
+              id: f.id,
+              score: 1,
+              model: "FormDefinition",
+              data: { name: f.name, slug: f.slug },
+            })),
+          );
         }
         if (model === "WorkflowDefinition") {
           const workflows = await ctx.prisma.workflowDefinition.findMany({
@@ -74,7 +95,14 @@ builder.queryField("search", (t) =>
             },
             take: args.limit ?? 10,
           });
-          hits.push(...workflows.map((w) => ({ id: w.id, score: 1, model: "WorkflowDefinition", data: { name: w.name, slug: w.slug } })));
+          hits.push(
+            ...workflows.map((w) => ({
+              id: w.id,
+              score: 1,
+              model: "WorkflowDefinition",
+              data: { name: w.name, slug: w.slug },
+            })),
+          );
         }
       }
 

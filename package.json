@@ -21,8 +21,5 @@
   "engines": {
     "node": ">=20"
   },
-  "packageManager": "npm@10.9.0",
-  "dependencies": {
-    "helmet": "^8.1.0"
-  }
+  "packageManager": "npm@10.9.0"
 }

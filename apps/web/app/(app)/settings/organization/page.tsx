@@ -16,7 +16,11 @@ const GET_ORGANIZATIONS = gql`
       members {
         id
         role
-        user { id name email }
+        user {
+          id
+          name
+          email
+        }
       }
     }
   }
@@ -38,10 +42,9 @@ type Organization = {
 };
 
 export default function OrganizationPage() {
-  const { data, loading, error } = useQuery<{ organizations: Organization[] }>(
-    GET_ORGANIZATIONS,
-    { fetchPolicy: "cache-and-network" },
-  );
+  const { data, loading, error } = useQuery<{ organizations: Organization[] }>(GET_ORGANIZATIONS, {
+    fetchPolicy: "cache-and-network",
+  });
 
   const orgs = data?.organizations ?? [];
 
@@ -83,7 +86,7 @@ export default function OrganizationPage() {
       ))}
 
       {orgs.length === 0 && !loading && (
-        <p className="py-12 text-center text-sm text-muted-foreground">
+        <p className="text-muted-foreground py-12 text-center text-sm">
           No organizations yet. Create one to get started.
         </p>
       )}

@@ -65,9 +65,11 @@ export class FormsService {
   ) {
     const updateData: Record<string, unknown> = {};
     if (data.name !== undefined) updateData.name = data.name;
-    if (data.description !== undefined) updateData.description = data.description;
+    if (data.description !== undefined)
+      updateData.description = data.description;
     if (data.schema !== undefined) updateData.schema = data.schema;
-    if (data.fieldConfig !== undefined) updateData.fieldConfig = data.fieldConfig;
+    if (data.fieldConfig !== undefined)
+      updateData.fieldConfig = data.fieldConfig;
     if (data.logicRules !== undefined) updateData.logicRules = data.logicRules;
     if (data.isPublic !== undefined) updateData.isPublic = data.isPublic;
 
@@ -136,14 +138,24 @@ export class FormsService {
     formId: string,
     payload: unknown,
     submittedById?: string,
-  ): Promise<{ ok: boolean; errors?: Array<{ field: string | null; message: string }> }> {
+  ): Promise<{
+    ok: boolean;
+    errors?: Array<{ field: string | null; message: string }>;
+  }> {
     const form = await this.prisma.formDefinition.findUnique({
       where: { id: formId },
     });
 
-    if (!form) return { ok: false, errors: [{ field: null, message: "Form not found" }] };
+    if (!form)
+      return {
+        ok: false,
+        errors: [{ field: null, message: "Form not found" }],
+      };
     if (form.status !== "published") {
-      return { ok: false, errors: [{ field: null, message: "Form is not published" }] };
+      return {
+        ok: false,
+        errors: [{ field: null, message: "Form is not published" }],
+      };
     }
 
     // Validate against JSON Schema if schema is defined

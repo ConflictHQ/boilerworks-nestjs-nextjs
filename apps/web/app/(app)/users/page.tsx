@@ -27,7 +27,10 @@ const DELETE_USER = gql`
   mutation DeleteUser($id: String!) {
     deleteUser(id: $id) {
       ok
-      errors { field message }
+      errors {
+        field
+        message
+      }
     }
   }
 `;
@@ -52,7 +55,7 @@ export default function UsersPage() {
 
   const handleDeactivate = async (id: string, name: string) => {
     const { data: result } = await deleteUser({ variables: { id } });
-    if (result?.deleteUser?.ok) {
+    if ((result as Record<string, unknown> | undefined)?.deleteUser) {
       toast.success(`Deactivated ${name}`);
       refetch();
     } else {
@@ -111,7 +114,7 @@ export default function UsersPage() {
                     {user.isActive ? "Active" : "Inactive"}
                   </Badge>
                 </td>
-                <td className="p-3 text-sm text-muted-foreground">
+                <td className="text-muted-foreground p-3 text-sm">
                   {new Date(user.createdAt).toLocaleDateString()}
                 </td>
                 <td className="p-3">
@@ -131,7 +134,7 @@ export default function UsersPage() {
           </tbody>
         </table>
         {users.length === 0 && !loading && (
-          <p className="p-6 text-center text-sm text-muted-foreground">No users found.</p>
+          <p className="text-muted-foreground p-6 text-center text-sm">No users found.</p>
         )}
       </div>
     </div>

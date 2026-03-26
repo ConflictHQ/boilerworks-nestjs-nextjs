@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { createHmac } from "crypto";
+import { validateWebhookUrl } from "../common/url-validator";
 
 export type WebhookEvent =
   | "form.submitted"
@@ -16,11 +17,14 @@ export class WebhooksService {
   async dispatch(
     event: WebhookEvent,
     payload: Record<string, unknown>,
-    prisma: any,
+    _prisma: any,
   ) {
     // Find all active endpoints subscribed to this event
     // For now this is a no-op — will implement when WebhookEndpoint model is added
-    console.log(`[Webhook] Event: ${event}`, JSON.stringify(payload).substring(0, 200));
+    console.log(
+      `[Webhook] Event: ${event}`,
+      JSON.stringify(payload).substring(0, 200),
+    );
   }
 
   /**
@@ -34,6 +38,8 @@ export class WebhooksService {
    * Deliver a webhook to a URL with retry
    */
   async deliver(url: string, payload: Record<string, unknown>, secret: string) {
+    validateWebhookUrl(url);
+
     const body = JSON.stringify(payload);
     const signature = this.sign(body, secret);
 

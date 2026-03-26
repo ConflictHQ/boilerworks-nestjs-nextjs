@@ -30,7 +30,9 @@ export function mutationError(field: string | null, message: string) {
 }
 
 // Helper to map Zod errors to MutationResult
-export function zodToMutationErrors(zodError: { issues: Array<{ path: (string | number)[]; message: string }> }) {
+export function zodToMutationErrors(zodError: {
+  issues: Array<{ path: (string | number)[]; message: string }>;
+}) {
   return {
     ok: false,
     errors: zodError.issues.map((issue) => ({
