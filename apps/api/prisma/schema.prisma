@@ -101,6 +101,7 @@ model FormDefinition {
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
   createdById        String?
+  deletedAt          DateTime?
 
   submissions FormSubmission[]
 
@@ -135,6 +136,7 @@ model WorkflowDefinition {
   isEnabled   Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
 
   instances WorkflowInstance[]
 
@@ -182,6 +184,7 @@ model Upload {
   s3Key        String
   uploadedById String?
   createdAt    DateTime @default(now())
+  deletedAt    DateTime?
 
   @@index([s3Key])
 }

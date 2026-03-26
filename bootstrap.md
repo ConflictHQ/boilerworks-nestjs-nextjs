@@ -162,7 +162,7 @@ model Invoice {
 - Use `@@unique` for natural keys (e.g., `[slug, version]`)
 - Relations always specify `onDelete` behavior
 
-**Soft deletes:** Implemented via Prisma Extension (`prisma/extensions/soft-delete.ts`). Auto-filters `deletedAt IS NULL` on `findMany`/`findFirst` for soft-delete models (FormDefinition, WorkflowDefinition, Upload, Organization):
+**Soft deletes:** Implemented via Prisma Extension (`prisma/extensions/soft-delete.ts`). Applied via `PrismaService` which uses `$extends(softDeleteExtension)`. Auto-filters `deletedAt IS NULL` on `findMany`/`findFirst` for soft-delete models (FormDefinition, WorkflowDefinition, Upload, Organization). Always use `prisma.model.update({ data: { deletedAt: new Date() } })` — never `prisma.model.delete()`:
 
 ```typescript
 export const softDeleteExtension = Prisma.defineExtension({
@@ -281,7 +281,7 @@ export type GraphQLContext = {
 };
 ```
 
-Context is created per-request. Session token is read from the `backend_jwt` cookie or `Authorization: Bearer` header. User + permissions are loaded eagerly.
+Context is created per-request. Session token is read from the `backend_jwt` cookie or `Authorization: Bearer` header. User + permissions are loaded eagerly (includes groups → permissions). `PrismaService` is injected (not raw `PrismaClient`) — this ensures the soft-delete extension is active.
 
 **Auth check at the top of every resolver and mutation.** No exceptions:
 
@@ -433,11 +433,19 @@ AUTH0_DATABASE_CONNECTION_ID="Username-Password-Authentication"
 
 ---
 
-### Async Jobs (planned)
+### Async Jobs (BullMQ)
 
-BullMQ is in `package.json` but job processors are not yet implemented. Workflow actions and email sending currently run synchronously in resolvers.
+4 queues defined in `jobs/queues.ts`: `workflow-actions`, `email`, `webhooks`, `notifications`.
 
-When implementing BullMQ processors, follow this pattern:
+4 processors: `WorkflowActionProcessor`, `EmailProcessor`, `WebhookProcessor`, `NotificationProcessor`.
+
+`JobDispatcher` service dispatches jobs from resolvers — fire-and-forget with configurable retries.
+
+`JobsModule` imports `PrismaModule` and provides `EmailService`.
+
+Redis connection parsed from `REDIS_URL` env var.
+
+Bull Board monitoring at `/admin/queues` (requires valid session + superuser).
 
 ```typescript
 // jobs/workflow-action.processor.ts
@@ -450,7 +458,15 @@ export class WorkflowActionProcessor {
 }
 ```
 
-Register the processor in `app.module.ts` and configure Bull Board at `/admin/queues` for monitoring.
+Dispatch from a resolver or service:
+
+```typescript
+await this.jobDispatcher.dispatch("workflow-actions", "execute", {
+  instanceId,
+  actionType,
+  payload,
+});
+```
 
 ---
 
@@ -702,6 +718,12 @@ All env vars validated at startup via Zod (`config/env.ts`). App fails fast on m
 - **Rate limiting:** Per-endpoint, configurable via decorator
 - **Input validation:** Zod at API boundaries, Ajv for JSON Schema forms
 - **No raw SQL:** Always use Prisma query builder
+- **SSRF protection:** `common/url-validator.ts` — `validateWebhookUrl()` must be called before any outgoing HTTP request (webhooks, workflow actions). Blocks localhost, private IPs, non-HTTP schemes.
+- **Session token hashing:** Sessions are hashed with SHA256 before storage (same pattern as API keys). Raw token returned to client, hash stored in DB.
+- **Upload validation:** MIME type whitelist in `uploads.resolver.ts`, filename sanitization (strips `..`, null bytes, path separators), 50MB size limit.
+- **GraphQL depth limit:** Max depth 10 via custom validation rule (`graphql/depth-limit.ts`). Introspection disabled in production.
+- **Bull Board:** Protected at `/admin/queues` — requires valid session + superuser.
+- **Ownership checks:** Every mutation that modifies a user-owned resource must verify `record.createdById === ctx.user!.id` (or allow superusers). Pattern established in `uploads.resolver.ts` and `notifications.resolver.ts`.
 
 ---
 
@@ -715,6 +737,17 @@ chore/...     — tooling, deps, docs
 ```
 
 Open PRs against `main`. Keep PRs focused — one feature or fix per PR.
+
+---
+
+### CI (GitHub Actions)
+
+4 jobs: `lint`, `audit`, `build`, `test`
+
+- **lint**: `npm run lint` + `npm run format:check`
+- **audit**: `npm audit --omit=dev --audit-level=critical` (blocks on critical vulns only)
+- **build**: Prisma generate → migrate → `nest build` → `next build` (with Postgres + Redis services)
+- **test**: Prisma generate → migrate → seed → `vitest --run` (with Postgres + Redis services)
 
 ---
 
@@ -754,6 +787,10 @@ npm run db:seed               # Load dev fixtures
 docker compose -f docker/docker-compose.yaml up -d        # Start infra
 docker compose -f docker/docker-compose.yaml down          # Stop
 docker compose -f docker/docker-compose.yaml logs api -f   # Tail API logs
+# NOTE: Containers have their own node_modules (not mounted from host).
+# Source dirs are volume-mounted for hot reload (src/, prisma/, app/, components/).
+# After adding new npm deps, rebuild: docker compose up --build
+# prisma generate must run inside the container OR the container must be rebuilt.
 
 # run.sh (preferred — local dev command center)
 ./run.sh up           # Start everything

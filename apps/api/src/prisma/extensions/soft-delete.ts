@@ -1,7 +1,12 @@
 import { Prisma } from "@prisma/client";
 
 // Models that use soft-delete via deletedAt field
-const SOFT_DELETE_MODELS = ["FormDefinition", "WorkflowDefinition", "Upload"];
+const SOFT_DELETE_MODELS = [
+  "FormDefinition",
+  "WorkflowDefinition",
+  "Upload",
+  "Organization",
+];
 
 /**
  * Prisma extension for soft-delete behavior:

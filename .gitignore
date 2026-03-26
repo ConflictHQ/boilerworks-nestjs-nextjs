@@ -9,3 +9,17 @@ local.env
 .DS_Store
 coverage/
 *.tsbuildinfo
+
+# Build artifacts (tsc output in source dirs)
+apps/web/**/*.js
+apps/web/**/*.js.map
+apps/web/**/*.d.ts
+apps/web/**/*.d.ts.map
+apps/api/scripts/**/*.js
+apps/api/scripts/**/*.js.map
+apps/api/scripts/**/*.d.ts
+apps/api/scripts/**/*.d.ts.map
+apps/api/vitest.config.js
+apps/api/vitest.config.d.ts
+apps/api/vitest.config.js.map
+apps/api/vitest.config.d.ts.map
