@@ -2,7 +2,7 @@
 
 TypeScript full-stack boilerplate — NestJS + Prisma + Pothos GraphQL + Next.js. Forms engine, workflow engine, visual builders, session auth, permissions, and more.
 
-Sister project to [boilerworks-django-nextjs](https://github.com/ConflictHQ/boilerworks-django-nextjs). Same architecture, same features, TypeScript runtime.
+Full-stack TypeScript boilerplate for building production-ready SaaS applications.
 
 ---
 
@@ -45,7 +45,7 @@ Sister project to [boilerworks-django-nextjs](https://github.com/ConflictHQ/boil
 ## Getting Started
 
 ```shell
-git clone https://github.com/ConflictHQ/boilerworks-ts.git
+git clone https://github.com/ConflictHQ/boilerworks-nestjs-nextjs.git
 cd boilerworks-ts
 cp local.env.example local.env   # Edit with your Auth0 credentials
 npm install
@@ -96,4 +96,4 @@ docker/         # Docker Compose + Dockerfiles (dev + prod)
 
 ## License
 
-MIT
+[MIT](LICENSE)

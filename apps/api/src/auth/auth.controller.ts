@@ -4,7 +4,7 @@ import { randomBytes } from "crypto";
 import { AuthService } from "./auth.service";
 import { PrismaService } from "../prisma/prisma.service";
 
-const AUTH0_DOMAIN = process.env.AUTH0_DOMAIN || "conflict.us.auth0.com";
+const AUTH0_DOMAIN = process.env.AUTH0_DOMAIN || "your-tenant.us.auth0.com";
 const AUTH0_CLIENT_ID = process.env.AUTH0_CLIENT_ID || "";
 const AUTH0_CLIENT_SECRET = process.env.AUTH0_CLIENT_SECRET || "";
 const AUTH0_SCOPES = process.env.AUTH0_CLIENT_SCOPES || "openid profile email";

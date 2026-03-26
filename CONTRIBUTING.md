@@ -9,7 +9,7 @@ Thanks for your interest in contributing. This document covers everything you ne
 **Requirements:** Docker Desktop + Node.js 20+
 
 ```shell
-git clone https://github.com/ConflictHQ/boilerworks-ts.git
+git clone https://github.com/ConflictHQ/boilerworks-nestjs-nextjs.git
 cd boilerworks-ts
 cp local.env.example local.env   # Edit with your Auth0 credentials
 npm install
@@ -88,4 +88,4 @@ Use the [issue templates](.github/ISSUE_TEMPLATE/) — bug reports and feature r
 
 ## Questions
 
-Open a [GitHub Discussion](https://github.com/ConflictHQ/boilerworks-ts/discussions) for questions, ideas, or general feedback.
+Open a [GitHub Discussion](https://github.com/ConflictHQ/boilerworks-nestjs-nextjs/discussions) for questions, ideas, or general feedback.
