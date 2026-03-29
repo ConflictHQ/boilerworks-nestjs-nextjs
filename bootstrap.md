@@ -722,14 +722,14 @@ Open PRs against `main`. Keep PRs focused — one feature or fix per PR.
 
 | Service       | URL                                           |
 | ------------- | --------------------------------------------- |
-| API (GraphQL) | http://localhost:4000/graphql                 |
+| API (GraphQL) | http://localhost:8000/graphql                 |
 | Frontend      | http://localhost:3000                         |
 | Postgres      | localhost:5432                                |
 | Redis         | localhost:6379                                |
 | MinIO S3 API  | http://localhost:9000                         |
 | MinIO Console | http://localhost:9001 (minioadmin/minioadmin) |
 | Mailpit       | http://localhost:8025                         |
-| Bull Board    | http://localhost:4000/admin/queues            |
+| Bull Board    | http://localhost:8000/admin/queues            |
 
 ---
 

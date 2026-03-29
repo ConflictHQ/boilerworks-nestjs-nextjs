@@ -62,7 +62,7 @@ Open http://localhost:3000 and log in with `admin@boilerworks.dev` / `admin123`.
 | Service       | URL                                           |
 | ------------- | --------------------------------------------- |
 | Frontend      | http://localhost:3000                         |
-| API (GraphQL) | http://localhost:4000/graphql                 |
+| API (GraphQL) | http://localhost:8000/graphql                 |
 | Prisma Studio | http://localhost:5555                         |
 | MinIO Console | http://localhost:9001 (minioadmin/minioadmin) |
 | Mailpit       | http://localhost:8025                         |

@@ -44,7 +44,7 @@ cmd_up() {
   echo ""
   ok "Stack is running!"
   echo ""
-  echo "  API (GraphQL):  http://localhost:4000/graphql"
+  echo "  API (GraphQL):  http://localhost:8000/graphql"
   echo "  Frontend:       http://localhost:3000"
   echo "  Prisma Studio:  http://localhost:5555"
   echo "  MinIO Console:  http://localhost:9001  (minioadmin/minioadmin)"
@@ -81,7 +81,7 @@ cmd_status() {
 cmd_health() {
   _require_running
   info "Checking services..."
-  echo -n "  API:      " && curl -sf http://localhost:4000/health | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['status'])" 2>/dev/null || echo "down"
+  echo -n "  API:      " && curl -sf http://localhost:8000/health | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['status'])" 2>/dev/null || echo "down"
   echo -n "  Web:      " && curl -sf -o /dev/null -w "%{http_code}" http://localhost:3000 2>/dev/null && echo " ok" || echo "down"
   echo -n "  Postgres: " && $COMPOSE exec -T postgres pg_isready -U dbadmin -d boilerworks -q && echo "ok" || echo "down"
   echo -n "  Redis:    " && $COMPOSE exec -T redis redis-cli ping 2>/dev/null | tr -d '\r' || echo "down"
@@ -121,6 +121,8 @@ cmd_migrate() {
 
 cmd_seed() {
   _require_running
+  info "Running migrations..."
+  $COMPOSE exec -T api npx prisma migrate deploy 2>/dev/null || true
   info "Seeding database..."
   $COMPOSE exec api npx tsx prisma/seed.ts
   ok "Seeded."
@@ -201,7 +203,7 @@ cmd_help() {
   echo "  bash        Shell into API container"
   echo ""
   echo "URLs:"
-  echo "  API:        http://localhost:4000/graphql"
+  echo "  API:        http://localhost:8000/graphql"
   echo "  Frontend:   http://localhost:3000"
   echo "  Studio:     http://localhost:5555"
   echo "  MinIO:      http://localhost:9001"

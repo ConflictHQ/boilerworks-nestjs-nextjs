@@ -4,7 +4,7 @@ services:
       context: ../apps/api
       dockerfile: ../../docker/Dockerfile.api
     ports:
-      - "4000:4000"
+      - "8000:4000"
     env_file:
       - ../local.env
     depends_on:
@@ -23,7 +23,7 @@ services:
     ports:
       - "3000:3000"
     environment:
-      NEXT_PUBLIC_API_ROOT: http://localhost:4000
+      NEXT_PUBLIC_API_ROOT: http://localhost:8000
       NODE_ENV: development
     volumes:
       - ../apps/web/app:/app/app
