@@ -1,35 +1,27 @@
 ---
 name: Bug report
-about: Report something that isn't working
-title: ""
+about: Something is broken
 labels: bug
-assignees: ""
 ---
 
-## Describe the bug
+**Describe the bug**
+A clear description of what is wrong.
 
-<!-- Clear, concise description of what's broken -->
+**To reproduce**
+Steps to reproduce the behaviour:
+1. ...
+2. ...
 
-## Steps to reproduce
+**Expected behaviour**
+What you expected to happen.
 
-1.
-2.
-3.
+**Actual behaviour**
+What actually happened. Include error messages, stack traces, or screenshots.
 
-## Expected behavior
-
-<!-- What should happen -->
-
-## Actual behavior
-
-<!-- What actually happens -->
-
-## Environment
-
+**Environment**
 - OS:
-- Node version:
-- Browser (if frontend):
+- Docker version:
+- Branch/commit:
 
-## Additional context
-
-<!-- Logs, screenshots, related issues -->
+**Additional context**
+Any other relevant information.
