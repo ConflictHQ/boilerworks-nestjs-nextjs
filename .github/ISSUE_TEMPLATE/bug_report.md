@@ -9,6 +9,7 @@ A clear description of what is wrong.
 
 **To reproduce**
 Steps to reproduce the behaviour:
+
 1. ...
 2. ...
 
@@ -19,6 +20,7 @@ What you expected to happen.
 What actually happened. Include error messages, stack traces, or screenshots.
 
 **Environment**
+
 - OS:
 - Docker version:
 - Branch/commit:
