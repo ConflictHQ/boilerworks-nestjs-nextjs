@@ -1,6 +1,6 @@
 # Boilerworks TS — Bootstrap
 
-Primary conventions document for the Boilerworks TypeScript platform. All agent shims (`CLAUDE.md`, `AGENTS.md`, `GEMINI.md`) point here.
+Primary conventions document for the Boilerworks TypeScript platform. All agent shims (`CLAUDE.md`, `AGENTS.md`) point here.
 
 An agent given this document and a business requirement should be able to generate correct, idiomatic code without exploring the codebase.
 

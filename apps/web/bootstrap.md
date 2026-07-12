@@ -1,6 +1,6 @@
 # Boilerworks TS — Frontend Bootstrap
 
-Frontend conventions for the Boilerworks TypeScript platform. Agent shims (`CLAUDE.md`, `AGENTS.md`, `GEMINI.md`) point here.
+Frontend conventions for the Boilerworks TypeScript platform. Agent shims (`CLAUDE.md`, `AGENTS.md`) point here.
 
 An agent given this document and a business requirement should be able to generate correct, idiomatic frontend code without exploring the codebase.
 
