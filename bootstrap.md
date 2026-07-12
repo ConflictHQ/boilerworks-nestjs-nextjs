@@ -1,6 +1,6 @@
 # Boilerworks TS — Bootstrap
 
-Primary conventions document for the Boilerworks TypeScript platform. All agent shims (`CLAUDE.md`, `AGENTS.md`) point here.
+Primary conventions document for the Boilerworks TypeScript platform. All agent shims (`CLAUDE.md`, `AGENTS.md`, `CALLIOPE.md`) point here.
 
 An agent given this document and a business requirement should be able to generate correct, idiomatic code without exploring the codebase.
 
@@ -81,6 +81,7 @@ boilerworks-ts/
 │
 ├── bootstrap.md                # ← You are here
 ├── CLAUDE.md                   # Claude agent shim → points here
+├── CALLIOPE.md                 # Calliope agent shim → points here
 ├── turbo.json                  # Turborepo config
 └── package.json                # Root workspace
 ```
