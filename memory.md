@@ -36,7 +36,7 @@ Full-stack TypeScript boilerplate for building SaaS products. NestJS backend + N
 - **`fetchPolicy` must be set explicitly** in every Apollo hook — no implicit defaults.
 - **Never use `useQuery` in Server Components** — use `getClient().query()` instead.
 - **Never use `getClient()` in Client Components** — use hooks from `graphql/<domain>/`.
-- **Run `npm run lint` before committing** — Husky pre-commit hooks enforce this.
+- **Run `npm run lint` before committing** — nothing enforces this automatically; it's on you.
 - **Prisma client must be regenerated** after schema changes: `npx prisma generate`.
 - **Logic engine lives in frontend** at `components/forms/logic-engine.ts` — backend uses Ajv for JSON Schema validation. Both sides need to agree on field types.
 - **Feature flags gate module registration** — setting `FEATURE_FORMS=false` removes forms from the GraphQL schema entirely.

@@ -45,8 +45,8 @@ Sister project to [boilerworks-django-nextjs](https://github.com/ConflictHQ/boil
 ## Getting Started
 
 ```shell
-git clone https://github.com/ConflictHQ/boilerworks-ts.git
-cd boilerworks-ts
+git clone https://github.com/ConflictHQ/boilerworks-nestjs-nextjs.git
+cd boilerworks-nestjs-nextjs
 cp local.env.example local.env   # Edit with your Auth0 credentials
 npm install
 ./run.sh up                       # Start Docker stack + run migrations
