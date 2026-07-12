@@ -9,3 +9,13 @@ local.env
 .DS_Store
 coverage/
 *.tsbuildinfo
+
+# Stray tsc output next to TS sources (scripts/configs are run from .ts directly)
+apps/api/scripts/*.js
+apps/api/scripts/*.js.map
+apps/api/scripts/*.d.ts
+apps/api/scripts/*.d.ts.map
+apps/api/vitest.config.js
+apps/api/vitest.config.js.map
+apps/api/vitest.config.d.ts
+apps/api/vitest.config.d.ts.map
