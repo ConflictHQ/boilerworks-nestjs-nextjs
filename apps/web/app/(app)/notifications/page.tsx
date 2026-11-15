@@ -1,10 +1,10 @@
 "use client";
 
+import { Button, PageHeader } from "@calliopelabs/ui";
 import { useQuery, useMutation } from "@apollo/client/react";
 import { gql } from "@apollo/client";
-import { Separator } from "@/components/ui/separator";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/ui-app/primitives/separator";
+import { Badge } from "@/ui-app/primitives/badge";
 import { toast } from "sonner";
 import { CheckIcon, CheckCheckIcon } from "lucide-react";
 
@@ -71,12 +71,10 @@ export default function NotificationsPage() {
   return (
     <div className="flex flex-1 flex-col gap-6 p-6">
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-semibold">Notifications</h1>
-          <p className="text-muted-foreground mt-1 text-sm">
-            {unreadCount > 0 ? `${unreadCount} unread` : "All caught up"}
-          </p>
-        </div>
+        <PageHeader
+          title="Notifications"
+          description={unreadCount > 0 ? `${unreadCount} unread` : "All caught up"}
+        />
         {unreadCount > 0 && (
           <Button variant="outline" size="sm" onClick={handleMarkAllRead}>
             <CheckCheckIcon className="mr-1 h-4 w-4" /> Mark all read

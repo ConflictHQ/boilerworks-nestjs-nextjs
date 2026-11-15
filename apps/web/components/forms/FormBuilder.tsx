@@ -1,5 +1,6 @@
 "use client";
 
+import { Button, Input } from "@calliopelabs/ui";
 import React, { useState } from "react";
 import {
   DndContext,
@@ -29,16 +30,14 @@ import {
   ChevronUpIcon,
 } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Label } from "@/ui-app/primitives/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@/ui-app/primitives/select";
 
 const FIELD_TYPES = [
   { value: "text", label: "Text", icon: "Aa", hint: "Single-line text input" },

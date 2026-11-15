@@ -1,0 +1,13 @@
+# The build context is the repository root; the image needs the workspace
+# root files and apps/web only. Never the host's node_modules or build output.
+**
+!package.json
+!package-lock.json
+!apps/web/
+!storybook/nginx.conf
+**/node_modules
+apps/web/.next
+apps/web/storybook-static
+apps/web/coverage
+apps/web/.env
+apps/web/.env.*

@@ -1,10 +1,10 @@
 "use client";
 
+import { Button, PageHeader } from "@calliopelabs/ui";
 import { useQuery, useMutation } from "@apollo/client/react";
 import { gql } from "@apollo/client";
-import { Separator } from "@/components/ui/separator";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Separator } from "@/ui-app/primitives/separator";
+import { Badge } from "@/ui-app/primitives/badge";
 import { toast } from "sonner";
 import { PlusIcon } from "lucide-react";
 import Link from "next/link";
@@ -66,12 +66,7 @@ export default function UsersPage() {
   return (
     <div className="flex flex-1 flex-col gap-6 p-6">
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-semibold">Users</h1>
-          <p className="text-muted-foreground mt-1 text-sm">
-            Manage user accounts, roles, and permissions.
-          </p>
-        </div>
+        <PageHeader title="Users" description="Manage user accounts, roles, and permissions." />
         <Link href="/users/invite">
           <Button>
             <PlusIcon className="mr-1 h-4 w-4" /> Invite User

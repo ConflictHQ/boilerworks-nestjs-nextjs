@@ -76,7 +76,7 @@ Check via `requirePermission(ctx, "users.view")`. Superusers bypass all checks. 
 
 - Next.js App Router with RSC + client components
 - Apollo Client for GraphQL; UNAUTHENTICATED errors redirect to login
-- Dark mode via `next-themes`
+- Appearance (ground, accent, light or dark) via `@calliopelabs/ui` (`AppearanceScript`, `AppearanceProvider`)
 - i18n via `next-intl` (7 languages: en, de, es, fr, it, pl, pt)
 - Auth via Auth0 SSO + password fallback; session stored in httpOnly cookie `backend_jwt`
 

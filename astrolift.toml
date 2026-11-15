@@ -1,0 +1,90 @@
+# The app on Astrolift: `astro app register` reads this file, and the managed
+# workflow builds and deploys on every push to main.
+#
+# Rename before the first deploy: `name`, `[app].slug`, `display_name` and
+# `repo` (a generated app replaces "boilerworks-app" everywhere). The
+# Storybook is its own app, in storybook/astrolift.toml.
+#
+# Two workloads off one repo, each built from its own Dockerfile:
+#   api  NestJS (GraphQL, auth, jobs), bound to Postgres and Redis
+#   web  Next.js
+# Both are public: the browser calls the API directly (Apollo, session
+# cookie), so the web's NEXT_PUBLIC_API_ROOT is the api's public URL and the
+# api's CORS_ORIGINS is the web's. Bindings inject DATABASE_URL (postgres)
+# and REDIS_URL (redis). Secrets are created on the app:
+#   astro app secrets create SESSION_SECRET --stdin
+
+astrolift_version = 1
+name = "boilerworks-app"
+
+[app]
+slug = "boilerworks-app"
+display_name = "Boilerworks"
+runtime = "node"
+repo = "ConflictHQ/boilerworks-nestjs-nextjs"
+
+[environments.production]
+
+[[workloads]]
+name = "api"
+kind = "deployment"
+is_public = true
+replicas = 1
+cpu_request = "250m"
+cpu_limit = "1"
+memory_request = "256Mi"
+memory_limit = "512Mi"
+
+  [[workloads.containers]]
+  name = "api"
+  is_primary = true
+  dockerfile_path = "docker/Dockerfile.api.prod"
+  build_context = "apps/api"
+  port = 4000
+
+    [workloads.containers.healthcheck]
+    kind = "http"
+    value = "/health"
+    port = 4000
+
+[[workloads]]
+name = "web"
+kind = "deployment"
+is_public = true
+replicas = 1
+cpu_request = "250m"
+cpu_limit = "1"
+memory_request = "256Mi"
+memory_limit = "512Mi"
+
+  [[workloads.containers]]
+  name = "web"
+  is_primary = true
+  dockerfile_path = "docker/Dockerfile.web.prod"
+  build_context = "apps/web"
+  port = 3000
+
+    # The login page answers 200 without a session; "/" redirects.
+    [workloads.containers.healthcheck]
+    kind = "http"
+    value = "/auth/login"
+    port = 3000
+
+[[managed_services]]
+kind = "postgres"
+name = "boilerworks-app-db"
+owner_scope = "app"
+environment = "production"
+bind_workloads = ["api"]
+size = "small"
+deletion_policy = "retain"
+
+  [managed_services.config]
+  engine_version = "17"
+  backup_retention_days = 7
+
+[[managed_services]]
+kind = "redis"
+name = "boilerworks-app-redis"
+bind_workloads = ["api"]
+size = "small"

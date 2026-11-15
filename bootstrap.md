@@ -131,7 +131,7 @@ apps/web/app/(app)/invoices/
   new/page.tsx            # Create page
 ```
 
-Add to sidebar in `components/AppSidebar.tsx`. Add route label in `lib/routes.ts`.
+Add a row to `NAV` in `apps/web/ui-app/product.ts` (and its `nav` label in each `messages/<locale>.json`).
 
 ---
 
@@ -789,7 +789,7 @@ npx prisma migrate dev --name add_invoices
 
 # 7. Create pages under app/(app)/invoices/
 
-# 8. Add to sidebar in AppSidebar.tsx
+# 8. Add a row to NAV in ui-app/product.ts
 
 # 9. Write tests
 npm run test
