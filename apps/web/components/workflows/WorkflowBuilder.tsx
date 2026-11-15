@@ -496,7 +496,9 @@ export function WorkflowBuilder({
     [workflowStates, selectedStateName, refreshNodes, setEdges]
   );
 
-  removeStateRef.current = removeState;
+  React.useEffect(() => {
+    removeStateRef.current = removeState;
+  }, [removeState]);
 
   const onConnect = useCallback(
     (connection: Connection) => {
