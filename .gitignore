@@ -19,3 +19,7 @@ apps/api/vitest.config.js
 apps/api/vitest.config.js.map
 apps/api/vitest.config.d.ts
 apps/api/vitest.config.d.ts.map
+
+# Storybook build output
+storybook-static/
+debug-storybook.log

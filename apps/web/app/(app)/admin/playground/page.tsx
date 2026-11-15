@@ -1,18 +1,17 @@
 "use client";
 
-import { Separator } from "@/components/ui/separator";
+import { PageHeader } from "@calliopelabs/ui";
+import { Separator } from "@/ui-app/primitives/separator";
 
 export default function PlaygroundPage() {
   const apiRoot = process.env.NEXT_PUBLIC_API_ROOT ?? "http://localhost:4000";
 
   return (
     <div className="flex flex-1 flex-col gap-6 p-6">
-      <div>
-        <h1 className="text-xl font-semibold">API Playground</h1>
-        <p className="text-muted-foreground mt-1 text-sm">
-          Explore the GraphQL API with an interactive playground.
-        </p>
-      </div>
+      <PageHeader
+        title="API Playground"
+        description="Explore the GraphQL API with an interactive playground."
+      />
       <Separator />
 
       <div className="overflow-hidden rounded-lg border" style={{ height: "calc(100vh - 220px)" }}>

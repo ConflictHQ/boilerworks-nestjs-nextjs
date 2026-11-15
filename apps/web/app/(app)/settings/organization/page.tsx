@@ -1,9 +1,10 @@
 "use client";
 
+import { PageHeader } from "@calliopelabs/ui";
 import { useQuery } from "@apollo/client/react";
 import { gql } from "@apollo/client";
-import { Separator } from "@/components/ui/separator";
-import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/ui-app/primitives/separator";
+import { Badge } from "@/ui-app/primitives/badge";
 
 const GET_ORGANIZATIONS = gql`
   query GetOrganizations {
@@ -50,12 +51,7 @@ export default function OrganizationPage() {
 
   return (
     <div className="flex flex-1 flex-col gap-6 p-6">
-      <div>
-        <h1 className="text-xl font-semibold">Organizations</h1>
-        <p className="text-muted-foreground mt-1 text-sm">
-          Manage organizations and team membership.
-        </p>
-      </div>
+      <PageHeader title="Organizations" description="Manage organizations and team membership." />
       <Separator />
 
       {loading && !data && <p className="text-muted-foreground text-sm">Loading...</p>}

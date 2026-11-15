@@ -2,10 +2,12 @@ import { defineConfig, globalIgnores } from "eslint/config";
 import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
 import prettierConfig from "eslint-config-prettier";
+import storybook from "eslint-plugin-storybook";
 
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
+  ...storybook.configs["flat/recommended"],
   prettierConfig,
   {
     rules: {
@@ -22,6 +24,7 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    "storybook-static/**",
   ]),
 ]);
 

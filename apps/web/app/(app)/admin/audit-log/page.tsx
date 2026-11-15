@@ -1,8 +1,9 @@
 "use client";
 
+import { PageHeader } from "@calliopelabs/ui";
 import { useQuery } from "@apollo/client/react";
 import { gql } from "@apollo/client";
-import { Separator } from "@/components/ui/separator";
+import { Separator } from "@/ui-app/primitives/separator";
 
 const GET_AUDIT_LOGS = gql`
   query GetAuditLogs($limit: Int) {
@@ -44,10 +45,7 @@ export default function AuditLogPage() {
 
   return (
     <div className="flex flex-1 flex-col gap-6 p-6">
-      <div>
-        <h1 className="text-xl font-semibold">Audit Log</h1>
-        <p className="text-muted-foreground mt-1 text-sm">View all system actions and mutations.</p>
-      </div>
+      <PageHeader title="Audit Log" description="View all system actions and mutations." />
       <Separator />
 
       {loading && !data && <p className="text-muted-foreground text-sm">Loading...</p>}

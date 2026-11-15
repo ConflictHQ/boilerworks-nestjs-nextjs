@@ -19,6 +19,26 @@ jobs:
       - run: npm run lint
       - run: npm run format:check
 
+  web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Typecheck
+        working-directory: apps/web
+        run: npm run typecheck
+      # Every story rendered with the a11y checks, and story coverage for ui-app/.
+      - name: Test
+        working-directory: apps/web
+        run: npm test
+      - name: Build Storybook
+        working-directory: apps/web
+        run: npm run build-storybook
+
   audit:
     runs-on: ubuntu-latest
     steps:

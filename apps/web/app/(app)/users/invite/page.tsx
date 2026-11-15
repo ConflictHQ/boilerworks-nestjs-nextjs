@@ -1,11 +1,11 @@
 "use client";
 
+import { Button, PageHeader } from "@calliopelabs/ui";
 import { useState } from "react";
 import { useMutation, useQuery } from "@apollo/client/react";
 import { gql } from "@apollo/client";
 import { useRouter } from "next/navigation";
-import { Separator } from "@/components/ui/separator";
-import { Button } from "@/components/ui/button";
+import { Separator } from "@/ui-app/primitives/separator";
 import { toast } from "sonner";
 
 const GET_GROUPS = gql`
@@ -65,12 +65,10 @@ export default function InviteUserPage() {
 
   return (
     <div className="flex flex-1 flex-col gap-6 p-6">
-      <div>
-        <h1 className="text-xl font-semibold">Invite User</h1>
-        <p className="text-muted-foreground mt-1 text-sm">
-          Send an invitation email with pre-assigned group membership.
-        </p>
-      </div>
+      <PageHeader
+        title="Invite User"
+        description="Send an invitation email with pre-assigned group membership."
+      />
       <Separator />
 
       <form onSubmit={handleSubmit} className="max-w-md space-y-4">
