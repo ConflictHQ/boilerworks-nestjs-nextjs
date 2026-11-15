@@ -49,15 +49,14 @@ export function DynamicForm({ slug, onSuccess }: DynamicFormProps) {
     Record<string, unknown>
   >;
 
+  const watchedKey = JSON.stringify(watchedValues);
+  const logicRulesKey = JSON.stringify(logicRules);
+  const fieldConfigKey = JSON.stringify(fieldConfig);
+  const fieldNamesKey = fieldNames.join(",");
   const logicState: LogicState = useMemo(
     () => evaluateLogicRules(logicRules, fieldConfig, watchedValues ?? {}, fieldNames),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      JSON.stringify(watchedValues),
-      JSON.stringify(logicRules),
-      JSON.stringify(fieldConfig),
-      fieldNames.join(","),
-    ]
+    [watchedKey, logicRulesKey, fieldConfigKey, fieldNamesKey]
   );
 
   useEffect(() => {

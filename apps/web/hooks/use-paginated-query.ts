@@ -232,6 +232,7 @@ export function usePaginatedQuery<
   useEffect(() => {
     if (loading) return;
     const safe = sanitizePage(page, totalPageCount);
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- clamp to server-reported page count
     if (safe !== page) setPage(safe);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [totalPageCount, loading]);
