@@ -6,6 +6,10 @@ COPY package.json ./
 RUN npm install
 COPY . .
 
+# NEXT_PUBLIC_API_ROOT is compiled into the browser bundle, so it is a build
+# argument: the api's public URL, without a trailing slash.
+ARG NEXT_PUBLIC_API_ROOT=http://localhost:4000
+ENV NEXT_PUBLIC_API_ROOT=$NEXT_PUBLIC_API_ROOT
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN npx next build
 

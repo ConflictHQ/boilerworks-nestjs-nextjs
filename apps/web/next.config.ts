@@ -4,7 +4,7 @@ import createNextIntlPlugin from "next-intl/plugin";
 
 const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
 
-// standalone: docker/Dockerfile.web.prod (the Astrolift web workload) runs .next/standalone.
+// standalone: apps/web/Dockerfile (the Astrolift web app) runs .next/standalone.
 const nextConfig: NextConfig = { output: "standalone" };
 
 export default withSentryConfig(withNextIntl(nextConfig), {

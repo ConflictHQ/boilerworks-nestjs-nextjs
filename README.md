@@ -53,27 +53,31 @@ This template is the reference for building on the Calliope AI design system and
 - **The shell and patterns from the library.** `AppShell`, `Sidebar`, `BrandMark`, `UserMenu`, `Breadcrumbs`, `PageHeader`, `DataTable`, `EmptyState`, `ErrorState`, `LoadingState`, `StatusBadge`, `AppearancePicker`, and the primitives `Button`, `Input`, `Checkbox`, `DropdownMenu`, `Popover`, `Skeleton`, `AlertDialog` and `Drawer`.
 - **The app's own layer, `ui-app/`.** The shadcn components the library does not have (`primitives/`), the signed-in frame (`shell/AppFrame.tsx`), and the two `TableController`s for the library `DataTable` (`table/`: `paginatedController` over `usePaginatedQuery`, `useLocalTable` for rows already in hand).
 - **A Storybook with gates.** `npm run storybook -w apps/web` (Storybook 10, `@storybook/nextjs-vite`). `npm test -w apps/web` renders every story with the a11y addon's WCAG A and AA checks and fails on a violation, and requires a sibling story for every component in `ui-app/`.
-- **Astrolift manifests.** `astrolift.toml` for the app (api and web workloads, Postgres, Redis) and `storybook/` (Dockerfile, nginx, `astrolift.toml`) for the Storybook as its own app.
+- **Astrolift manifests.** Astrolift builds one image per app, so there are three: `astrolift.toml` for the API (`apps/api/Dockerfile`, Postgres, Redis), `apps/web/astrolift.toml` for the web (`apps/web/Dockerfile`, Next.js standalone), and `storybook/` (Dockerfile, nginx, `astrolift.toml`) for the Storybook.
 - **Upgrades.** `.github/dependabot.yml` checks npm daily and puts `@calliopelabs/*` releases in their own pull request.
 
 ### Rename the product
 
 1. `apps/web/ui-app/product.ts`: set `id` (lowercase slug, also the appearance storage key) and `name`; pick an `accent` (a family accent or the product's own) and a `sidebar` colour, or spread a shipped brand (`astroliftBrand`, `zentinelleBrand`, ...). Edit `NAV` for the app's areas and rows; each row's `key` is its message key in the `nav` namespace.
 2. `apps/web/ui-app/shell/AppFrame.tsx`: the brand mark (a lucide icon by default; an `<img>` of the logo works).
-3. Replace `boilerworks-app` in `astrolift.toml` and `storybook/astrolift.toml` (`name`, `slug`, `display_name`, `repo`, the managed service names).
+3. Replace `boilerworks-app` in `astrolift.toml`, `apps/web/astrolift.toml` and `storybook/astrolift.toml` (`name`, `slug`, `display_name`, `repo`, the managed service names).
 
 ### Deploy with Astrolift
 
 ```shell
 astro app register --project-id <uuid> --source-repo <org>/<repo>
+astro app register -f apps/web/astrolift.toml --manifest-path apps/web/astrolift.toml \
+  --project-id <uuid> --source-repo <org>/<repo>
 astro app register -f storybook/astrolift.toml --manifest-path storybook/astrolift.toml \
   --project-id <uuid> --source-repo <org>/<repo>
 astro app secrets create SESSION_SECRET boilerworks-app --stdin   # and the api's other secrets
 ```
 
-Both manifests name their Dockerfiles and build contexts, so the build runs from the repository root. Pushes to `main` deploy through the managed workflow. The browser calls the API directly, so set the web's `NEXT_PUBLIC_API_ROOT` to the api's public URL and the api's `CORS_ORIGINS` to the web's. Build and check the Storybook image locally:
+The API builds `apps/api`, the web builds `apps/web`, and the Storybook builds from the repository root, because its workspace install needs the root lockfile. Pushes to `main` deploy through the managed workflow. The browser calls the API directly, so the web's `NEXT_PUBLIC_API_ROOT` is the API's public URL (compiled into the bundle, so a build argument of the web app) and the API's `CORS_ORIGINS` is the web's. Build and check the images locally:
 
 ```shell
+docker build -t app-api apps/api
+docker build -t app-web --build-arg NEXT_PUBLIC_API_ROOT=http://localhost:4000 apps/web
 docker build -f storybook/Dockerfile -t app-storybook .
 docker run --rm -p 8080:8080 app-storybook        # http://localhost:8080, /healthz answers ok
 ```
@@ -136,7 +140,7 @@ apps/
   web/          # Next.js frontend (shadcn/ui, Apollo, forms/workflow builders)
 packages/
   shared/       # Shared types (planned — form fields, permissions)
-docker/         # Docker Compose + Dockerfiles (dev + prod)
+docker/         # Docker Compose + dev Dockerfiles
 ```
 
 ---
