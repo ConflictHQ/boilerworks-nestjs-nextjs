@@ -1,4 +1,5 @@
 # Calliope — Boilerworks TS
+
 <!-- Agent shim for https://github.com/calliopeai/calliope-cli -->
 
 Primary conventions doc: [`bootstrap.md`](bootstrap.md)
